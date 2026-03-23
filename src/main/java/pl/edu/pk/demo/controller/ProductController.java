@@ -1,10 +1,13 @@
 package pl.edu.pk.demo.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.pk.demo.model.Product;
-import pl.edu.pk.demo.repository.ProductRepository;
+import pl.edu.pk.demo.dto.ProductRequest;
+import pl.edu.pk.demo.dto.ProductResponse;
+import pl.edu.pk.demo.mapper.ProductMapper;
+import pl.edu.pk.demo.service.ProductService;
 
 import java.util.List;
 
@@ -12,40 +15,41 @@ import java.util.List;
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductRepository productRepository;
+    private final ProductService service;
 
-    public ProductController(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public ProductController(ProductService service) {
+        this.service = service;
     }
 
-    // GET /api/products - lista wszystkich produktów
     @GetMapping
-    public List<Product> getAll() {
-        return productRepository.findAll();
+    public List<ProductResponse> getAll() {
+        return service.getAllProducts().stream()
+                .map(ProductMapper::toResponse)
+                .toList();
     }
 
-    // GET /api/products/{id} - pojedynczy produkt lub 404
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getById(@PathVariable Long id) {
-        return productRepository.findById(id)
+    public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
+        return service.getProductById(id)
+                .map(ProductMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST /api/products - nowy produkt
     @PostMapping
-    public ResponseEntity<Product> create(@RequestBody Product product) {
-        Product saved = productRepository.save(product);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
+        ProductResponse response = ProductMapper.toResponse(
+                service.createProduct(ProductMapper.toEntity(request))
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // DELETE /api/products/{id} - usuń produkt
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (!productRepository.existsById(id)) {
+        if (service.getProductById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        productRepository.deleteById(id);
+        service.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 }
