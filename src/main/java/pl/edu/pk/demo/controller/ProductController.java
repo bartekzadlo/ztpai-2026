@@ -21,6 +21,7 @@ public class ProductController {
         this.service = service;
     }
 
+    /** GET /api/products -> 200 z listą */
     @GetMapping
     public List<ProductResponse> getAll() {
         return service.getAllProducts().stream()
@@ -28,14 +29,13 @@ public class ProductController {
                 .toList();
     }
 
+    /** GET /api/products/{id} -> 200 lub 404 (obsługa w GlobalExceptionHandler) */
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
-        return service.getProductById(id)
-                .map(ProductMapper::toResponse)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ProductResponse getById(@PathVariable Long id) {
+        return ProductMapper.toResponse(service.getProductById(id));
     }
 
+    /** POST /api/products -> 201 lub 400 przy złych danych */
     @PostMapping
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         ProductResponse response = ProductMapper.toResponse(
@@ -44,11 +44,9 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /** DELETE /api/products/{id} -> 204 lub 404 */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (service.getProductById(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
         service.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }

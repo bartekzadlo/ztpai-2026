@@ -1,20 +1,18 @@
 package pl.edu.pk.demo.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public class ProductRequest {
 
-    @NotNull(message = "Nazwa wymagana")
-    @Size(min = 3, max = 100)
+    @NotBlank(message = "Nazwa produktu nie może być pusta")
+    @Size(min = 3, max = 100, message = "Nazwa musi mieć od 3 do 100 znaków")
     private String name;
 
-    @NotNull(message = "Cena wymagana")
-    @Min(value = 0, message = "Cena >= 0")
+    @NotNull(message = "Cena jest wymagana")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Cena musi być większa lub równa 0")
     private Double price;
 
-    @Size(max = 500)
+    @Size(max = 500, message = "Opis nie może przekraczać 500 znaków")
     private String description;
 
     public String getName() { return name; }

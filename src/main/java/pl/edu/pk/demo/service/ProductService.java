@@ -1,11 +1,11 @@
 package pl.edu.pk.demo.service;
 
 import org.springframework.stereotype.Service;
+import pl.edu.pk.demo.exception.ResourceNotFoundException;
 import pl.edu.pk.demo.model.Product;
 import pl.edu.pk.demo.repository.ProductRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -20,8 +20,12 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Optional<Product> getProductById(Long id) {
-        return productRepository.findById(id);
+    /**
+     * Zwraca produkt lub rzuca ResourceNotFoundException (-> 404).
+     */
+    public Product getProductById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Produkt", id));
     }
 
     public Product createProduct(Product product) {
@@ -29,6 +33,8 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
+        // Najpierw sprawdź istnienie – rzuci 404 jeśli brak
+        getProductById(id);
         productRepository.deleteById(id);
     }
 }
