@@ -29,6 +29,9 @@ public class ProductService {
     }
 
     public Product createProduct(Product product) {
+        if (product.getName() == null || product.getName().isBlank()) {
+            throw new IllegalArgumentException("Nazwa produktu nie może być null ani pusta");
+        }
         return productRepository.save(product);
     }
 
