@@ -55,11 +55,16 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // Auth endpoints - publiczne
                         .requestMatchers("/api/auth/**").permitAll()
+                        // H2 console - tylko dev
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/products").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+                        // Gry: odczyt dla zalogowanych, zapis/usuwanie tylko ADMIN
+                        .requestMatchers(HttpMethod.GET, "/api/games", "/api/games/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/games").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/games/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/games/**").hasRole("ADMIN")
+                        // Panel admina
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

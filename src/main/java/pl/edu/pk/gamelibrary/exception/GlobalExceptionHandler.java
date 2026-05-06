@@ -14,9 +14,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Obsługa błędów walidacji (@Valid) -> HTTP 400
-     */
+    /** Błędy walidacji (@Valid) -> HTTP 400 */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new LinkedHashMap<>();
@@ -25,7 +23,6 @@ public class GlobalExceptionHandler {
                         error.getField(),
                         error.getDefaultMessage()
                 ));
-
         ErrorResponse body = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Błąd walidacji – popraw przesłane dane",
@@ -34,53 +31,32 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
-    /**
-     * Obsługa brakującego zasobu -> HTTP 404
-     */
+    /** Brakujący zasób -> HTTP 404 */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
-        ErrorResponse body = new ErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 
-    /**
-     * Brak autoryzacji (Spring Security) -> HTTP 401
-     * Musi być obsługiwany tutaj żeby nie wpadł do handleGeneral
-     */
+    /** Brak autoryzacji -> HTTP 401 */
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
-        ErrorResponse body = new ErrorResponse(
-                HttpStatus.UNAUTHORIZED.value(),
-                "Unauthorized"
-        );
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), "Unauthorized"));
     }
 
-    /**
-     * Brak uprawnień (zła rola) -> HTTP 403
-     * Musi być obsługiwany tutaj żeby nie wpadł do handleGeneral
-     */
+    /** Brak uprawnień (zła rola) -> HTTP 403 */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
-        ErrorResponse body = new ErrorResponse(
-                HttpStatus.FORBIDDEN.value(),
-                "Forbidden"
-        );
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Forbidden"));
     }
 
-    /**
-     * Ogólny fallback -> HTTP 500
-     */
+    /** Fallback -> HTTP 500 */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
-        ErrorResponse body = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Wystąpił nieoczekiwany błąd serwera"
-        );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "Wystąpił nieoczekiwany błąd serwera"));
     }
 }

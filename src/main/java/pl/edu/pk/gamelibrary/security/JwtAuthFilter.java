@@ -34,7 +34,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            // Brak tokenu -> przepuść, Security zwróci 401 przez authenticationEntryPoint
             filterChain.doFilter(request, response);
             return;
         }
@@ -42,14 +41,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         if (!jwtService.isTokenValid(token)) {
-            // Token istnieje ale nieważny/wygasły -> 403
-            // Piszemy bezpośrednio do response żeby uniknąć przekierowania przez /error
             writeError(response, HttpServletResponse.SC_FORBIDDEN, "Invalid or expired token");
             return;
         }
 
-        // Token prawidłowy - ustaw authentication
-        // Spring Security sprawdzi rolę: jeśli zła -> accessDeniedHandler -> 403
         String username = jwtService.extractUsername(token);
         String role = jwtService.extractRole(token);
 
@@ -65,10 +60,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.setStatus(status);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        String body = objectMapper.writeValueAsString(Map.of(
-                "status", status,
-                "message", message
-        ));
-        response.getWriter().write(body);
+        response.getWriter().write(objectMapper.writeValueAsString(
+                Map.of("status", status, "message", message)));
     }
 }

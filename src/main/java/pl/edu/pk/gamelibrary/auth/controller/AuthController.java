@@ -22,7 +22,6 @@ public class AuthController {
 
     /**
      * POST /api/auth/register
-     * Rejestruje nowego użytkownika. Hasło jest hashowane BCryptem.
      * Body: { "username": "...", "password": "...", "role": "USER|ADMIN" }
      * Role jest opcjonalne – domyślnie USER.
      */
@@ -39,8 +38,8 @@ public class AuthController {
 
     /**
      * POST /api/auth/login
-     * Zwraca JWT po poprawnym logowaniu.
      * Body: { "username": "...", "password": "..." }
+     * Zwraca JWT po poprawnym logowaniu.
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
