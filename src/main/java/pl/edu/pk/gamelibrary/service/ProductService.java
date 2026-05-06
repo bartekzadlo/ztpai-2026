@@ -1,0 +1,43 @@
+package pl.edu.pk.gamelibrary.service;
+
+import org.springframework.stereotype.Service;
+import pl.edu.pk.gamelibrary.exception.ResourceNotFoundException;
+import pl.edu.pk.gamelibrary.model.Product;
+import pl.edu.pk.gamelibrary.repository.ProductRepository;
+
+import java.util.List;
+
+@Service
+public class ProductService {
+
+    private final ProductRepository productRepository;
+
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
+
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
+    /**
+     * Zwraca produkt lub rzuca ResourceNotFoundException (-> 404).
+     */
+    public Product getProductById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Produkt", id));
+    }
+
+    public Product createProduct(Product product) {
+        if (product.getName() == null || product.getName().isBlank()) {
+            throw new IllegalArgumentException("Nazwa produktu nie może być null ani pusta");
+        }
+        return productRepository.save(product);
+    }
+
+    public void deleteProduct(Long id) {
+        // Najpierw sprawdź istnienie – rzuci 404 jeśli brak
+        getProductById(id);
+        productRepository.deleteById(id);
+    }
+}
