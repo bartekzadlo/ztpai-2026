@@ -1,6 +1,7 @@
 package pl.edu.pk.gamelibrary.review.dto;
 
 import java.time.LocalDateTime;
+import pl.edu.pk.gamelibrary.review.RatingProfile;
 
 public class ReviewResponse {
 
@@ -21,6 +22,8 @@ public class ReviewResponse {
 
     /** Ważona ocena ogólna obliczona przez encję. */
     private Double overallScore;
+
+    private RatingProfile ratingProfile;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -63,6 +66,9 @@ public class ReviewResponse {
 
     public Double getOverallScore() { return overallScore; }
     public void setOverallScore(Double overallScore) { this.overallScore = overallScore; }
+
+    public RatingProfile getRatingProfile() { return ratingProfile; }
+    public void setRatingProfile(RatingProfile ratingProfile) { this.ratingProfile = ratingProfile; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

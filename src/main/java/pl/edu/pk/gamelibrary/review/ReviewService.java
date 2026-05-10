@@ -6,6 +6,7 @@ import pl.edu.pk.gamelibrary.auth.repository.UserRepository;
 import pl.edu.pk.gamelibrary.exception.ResourceNotFoundException;
 import pl.edu.pk.gamelibrary.game.Game;
 import pl.edu.pk.gamelibrary.game.GameRepository;
+import pl.edu.pk.gamelibrary.review.RatingProfile;
 import pl.edu.pk.gamelibrary.review.dto.ReviewRequest;
 
 import java.util.List;
@@ -71,11 +72,13 @@ public class ReviewService {
                     "Użytkownik już wystawił recenzję dla gry o id=" + request.getGameId());
         }
 
-        validateScores(request);
+        RatingProfile profile = resolveProfileForCreate(game, request);
+        validateScores(game, profile, request);
 
         Review review = ReviewMapper.toEntity(request);
         review.setGame(game);
         review.setAuthor(author);
+        review.setRatingProfile(profile);
         review.recalculateOverallScore();
 
         return reviewRepository.save(review);
@@ -98,7 +101,8 @@ public class ReviewService {
                     "Brak uprawnień do edycji recenzji id=" + reviewId);
         }
 
-        validateScores(request);
+        RatingProfile profile = resolveProfileForUpdate(existing, request);
+        validateScores(existing.getGame(), profile, request);
 
         existing.setTitle(request.getTitle());
         existing.setContent(request.getContent());
@@ -107,6 +111,7 @@ public class ReviewService {
         existing.setSoundScore(request.getSoundScore());
         existing.setStoryScore(request.getStoryScore());
         existing.setReplayValueScore(request.getReplayValueScore());
+        existing.setRatingProfile(profile);
         existing.recalculateOverallScore();
 
         return reviewRepository.save(existing);
@@ -149,16 +154,54 @@ public class ReviewService {
     // Pomocnicze
     // ──────────────────────────────────────────────
 
-    private void validateScores(ReviewRequest req) {
-        validateScore("gameplay",    req.getGameplayScore());
-        validateScore("graphics",    req.getGraphicsScore());
-        validateScore("sound",       req.getSoundScore());
-        validateScore("story",       req.getStoryScore());
-        validateScore("replayValue", req.getReplayValueScore());
+    private RatingProfile resolveProfileForCreate(Game game, ReviewRequest req) {
+        if (req.getRatingProfile() != null) {
+            return req.getRatingProfile();
+        }
+        if (game.getDefaultRatingProfile() != null) {
+            return game.getDefaultRatingProfile();
+        }
+        return RatingProfile.DEFAULT;
     }
 
-    private void validateScore(String name, Integer value) {
+    private RatingProfile resolveProfileForUpdate(Review existing, ReviewRequest req) {
+        if (req.getRatingProfile() != null) {
+            return req.getRatingProfile();
+        }
+        if (existing.getRatingProfile() != null) {
+            return existing.getRatingProfile();
+        }
+        Game game = existing.getGame();
+        return game != null && game.getDefaultRatingProfile() != null
+                ? game.getDefaultRatingProfile()
+                : RatingProfile.DEFAULT;
+    }
+
+    private void validateScores(Game game, RatingProfile profile, ReviewRequest req) {
+        validateScoreRequired("gameplay",    req.getGameplayScore());
+        validateScoreRequired("graphics",    req.getGraphicsScore());
+        validateScoreRequired("sound",       req.getSoundScore());
+        validateScoreRequired("replayValue", req.getReplayValueScore());
+
+        boolean gameHasStory = game != null && game.isHasStory();
+        boolean storyRequired = gameHasStory && profile == RatingProfile.NARRATIVE;
+        if (storyRequired) {
+            validateScoreRequired("story", req.getStoryScore());
+        } else {
+            validateScoreOptional("story", req.getStoryScore());
+        }
+    }
+
+    private void validateScoreRequired(String name, Integer value) {
         if (value == null || value < 1 || value > 10) {
+            throw new IllegalArgumentException(
+                    "Ocena '" + name + "' musi być w zakresie 1–10, otrzymano: " + value);
+        }
+    }
+
+    private void validateScoreOptional(String name, Integer value) {
+        if (value == null) return;
+        if (value < 1 || value > 10) {
             throw new IllegalArgumentException(
                     "Ocena '" + name + "' musi być w zakresie 1–10, otrzymano: " + value);
         }

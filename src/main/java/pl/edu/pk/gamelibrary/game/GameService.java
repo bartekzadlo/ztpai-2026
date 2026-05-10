@@ -2,6 +2,7 @@ package pl.edu.pk.gamelibrary.game;
 
 import org.springframework.stereotype.Service;
 import pl.edu.pk.gamelibrary.exception.ResourceNotFoundException;
+import pl.edu.pk.gamelibrary.review.RatingProfile;
 
 import java.util.List;
 
@@ -30,6 +31,10 @@ public class GameService {
         if (game.getTitle() == null || game.getTitle().isBlank()) {
             throw new IllegalArgumentException("Tytuł gry nie może być null ani pusty");
         }
+        // Bezpieczne domyślne wartości dla pól opcjonalnych w żądaniu.
+        if (game.getDefaultRatingProfile() == null) {
+            game.setDefaultRatingProfile(RatingProfile.DEFAULT);
+        }
         return gameRepository.save(game);
     }
 
@@ -41,6 +46,8 @@ public class GameService {
         existing.setPlatform(updated.getPlatform());
         existing.setReleaseYear(updated.getReleaseYear());
         existing.setCoverUrl(updated.getCoverUrl());
+        existing.setHasStory(updated.isHasStory());
+        existing.setDefaultRatingProfile(updated.getDefaultRatingProfile());
         return gameRepository.save(existing);
     }
 

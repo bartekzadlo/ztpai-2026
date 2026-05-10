@@ -1,6 +1,7 @@
 package pl.edu.pk.gamelibrary.game.dto;
 
 import jakarta.validation.constraints.*;
+import pl.edu.pk.gamelibrary.review.RatingProfile;
 
 public class GameRequest {
 
@@ -23,6 +24,12 @@ public class GameRequest {
 
     private String coverUrl;
 
+    /** Czy gra ma fabułę/narrację (gdy null -> domyślnie true). */
+    private Boolean hasStory;
+
+    /** Domyślny profil oceniania (gdy null -> DEFAULT). */
+    private RatingProfile defaultRatingProfile;
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
@@ -40,4 +47,10 @@ public class GameRequest {
 
     public String getCoverUrl() { return coverUrl; }
     public void setCoverUrl(String coverUrl) { this.coverUrl = coverUrl; }
+
+    public Boolean getHasStory() { return hasStory; }
+    public void setHasStory(Boolean hasStory) { this.hasStory = hasStory; }
+
+    public RatingProfile getDefaultRatingProfile() { return defaultRatingProfile; }
+    public void setDefaultRatingProfile(RatingProfile defaultRatingProfile) { this.defaultRatingProfile = defaultRatingProfile; }
 }

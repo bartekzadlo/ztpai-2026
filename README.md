@@ -98,7 +98,9 @@ POST /api/auth/register
   "genre": "RPG",
   "platform": "PC",
   "releaseYear": 2015,
-  "coverUrl": "https://example.com/cover.jpg"
+  "coverUrl": "https://example.com/cover.jpg",
+  "hasStory": true,
+  "defaultRatingProfile": "DEFAULT"
 }
 ```
 
@@ -126,9 +128,12 @@ POST /api/auth/register
   "graphicsScore": 8,
   "soundScore": 9,
   "storyScore": 8,
-  "replayValueScore": 8
+  "replayValueScore": 8,
+  "ratingProfile": "DEFAULT"
 }
 ```
+
+> `storyScore` może być pominięte (N/A) dla gier bez fabuły. Wtedy ocena ogólna jest liczona z pozostałych kryteriów z renormalizacją wag.
 
 ### Kody HTTP
 

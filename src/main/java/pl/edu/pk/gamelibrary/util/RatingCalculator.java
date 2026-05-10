@@ -1,6 +1,7 @@
 package pl.edu.pk.gamelibrary.util;
 
 import org.springframework.stereotype.Component;
+import pl.edu.pk.gamelibrary.review.RatingProfile;
 import pl.edu.pk.gamelibrary.review.Review;
 
 import java.util.List;
@@ -26,6 +27,19 @@ public class RatingCalculator {
     public static final double WEIGHT_SOUND        = 0.15;
     public static final double WEIGHT_STORY        = 0.20;
     public static final double WEIGHT_REPLAY_VALUE = 0.15;
+
+    // Alternatywne profile wag dopasowane do istniejącego modelu (5 pól).
+    private static final double NARR_WEIGHT_GAMEPLAY     = 0.30;
+    private static final double NARR_WEIGHT_GRAPHICS     = 0.15;
+    private static final double NARR_WEIGHT_SOUND        = 0.15;
+    private static final double NARR_WEIGHT_STORY        = 0.30;
+    private static final double NARR_WEIGHT_REPLAY_VALUE = 0.10;
+
+    private static final double MP_WEIGHT_GAMEPLAY     = 0.40;
+    private static final double MP_WEIGHT_GRAPHICS     = 0.20;
+    private static final double MP_WEIGHT_SOUND        = 0.15;
+    private static final double MP_WEIGHT_STORY        = 0.00;
+    private static final double MP_WEIGHT_REPLAY_VALUE = 0.25;
 
     // ──────────────────────────────────────────────
     // Proste średnie (backward-compat)
@@ -64,23 +78,66 @@ public class RatingCalculator {
      * @throws IllegalArgumentException gdy review == null lub któreś kryterium jest null
      */
     public double calculateWeightedScore(Review review) {
+        return calculateWeightedScore(review, review != null ? review.getRatingProfile() : null);
+    }
+
+    /**
+     * Oblicza ważoną ocenę ogólną z uwzględnieniem profilu oraz kryteriów N/A (null).
+     *
+     * Zasada: kryteria o wartości null są pomijane, a wagi pozostałych są renormalizowane.
+     */
+    public double calculateWeightedScore(Review review, RatingProfile profile) {
         if (review == null) {
             throw new IllegalArgumentException("Recenzja nie może być null");
         }
-        assertScoreNotNull("gameplay",    review.getGameplayScore());
-        assertScoreNotNull("graphics",    review.getGraphicsScore());
-        assertScoreNotNull("sound",       review.getSoundScore());
-        assertScoreNotNull("story",       review.getStoryScore());
-        assertScoreNotNull("replayValue", review.getReplayValueScore());
+        return calculateWeightedScore(
+                review.getGameplayScore(),
+                review.getGraphicsScore(),
+                review.getSoundScore(),
+                review.getStoryScore(),
+                review.getReplayValueScore(),
+                profile
+        );
+    }
 
-        double weighted =
-                review.getGameplayScore()    * WEIGHT_GAMEPLAY     +
-                review.getGraphicsScore()    * WEIGHT_GRAPHICS     +
-                review.getSoundScore()       * WEIGHT_SOUND        +
-                review.getStoryScore()       * WEIGHT_STORY        +
-                review.getReplayValueScore() * WEIGHT_REPLAY_VALUE;
+    public static double calculateWeightedScore(Integer gameplay,
+                                                Integer graphics,
+                                                Integer sound,
+                                                Integer story,
+                                                Integer replayValue,
+                                                RatingProfile profile) {
+        if (profile == null) {
+            profile = RatingProfile.DEFAULT;
+        }
 
-        return Math.round(weighted * 10.0) / 10.0;
+        Weights w = weightsFor(profile);
+
+        // Core kryteria są wymagane niezależnie od profilu.
+        assertScoreNotNull("gameplay", gameplay);
+        assertScoreNotNull("graphics", graphics);
+        assertScoreNotNull("sound", sound);
+        assertScoreNotNull("replayValue", replayValue);
+
+        // Story jest wymagane tylko w profilu NARRATIVE (gdy ma wagę > 0).
+        if (w.story > 0 && profile == RatingProfile.NARRATIVE) {
+            assertScoreNotNull("story", story);
+        }
+
+        double sumWeighted = 0.0;
+        double sumWeights = 0.0;
+
+        if (w.gameplay > 0) { sumWeighted += gameplay * w.gameplay; sumWeights += w.gameplay; }
+        if (w.graphics > 0) { sumWeighted += graphics * w.graphics; sumWeights += w.graphics; }
+        if (w.sound > 0) { sumWeighted += sound * w.sound; sumWeights += w.sound; }
+        if (story != null && w.story > 0) { sumWeighted += story * w.story; sumWeights += w.story; }
+        if (w.replayValue > 0) { sumWeighted += replayValue * w.replayValue; sumWeights += w.replayValue; }
+
+        if (sumWeights <= 0.0) {
+            throw new IllegalArgumentException("Brak kryteriów do obliczenia oceny (wszystkie N/A?)");
+        }
+
+        double normalized = sumWeighted / sumWeights;
+        return round1(normalized);
     }
 
     /**
@@ -123,29 +180,52 @@ public class RatingCalculator {
             return 0.0;
         }
         double avg = reviews.stream()
-                .mapToInt(r -> extractScore(r, criterion))
+                .map(r -> extractScoreNullable(r, criterion))
+                .filter(v -> v != null)
+                .mapToInt(Integer::intValue)
                 .average()
                 .orElse(0.0);
-        return Math.round(avg * 10.0) / 10.0;
+        return round1(avg);
     }
 
     // ──────────────────────────────────────────────
     // Pomocnicze
     // ──────────────────────────────────────────────
 
-    private void assertScoreNotNull(String name, Integer value) {
+    private static Integer extractScoreNullable(Review review, Criterion criterion) {
+        if (review == null) return null;
+        return switch (criterion) {
+            case GAMEPLAY     -> review.getGameplayScore();
+            case GRAPHICS     -> review.getGraphicsScore();
+            case SOUND        -> review.getSoundScore();
+            case STORY        -> review.getStoryScore();
+            case REPLAY_VALUE -> review.getReplayValueScore();
+        };
+    }
+
+    private static double round1(double value) {
+        return Math.round(value * 10.0) / 10.0;
+    }
+
+    private static void assertScoreNotNull(String name, Integer value) {
         if (value == null) {
             throw new IllegalArgumentException("Ocena '" + name + "' nie może być null");
         }
     }
 
-    private int extractScore(Review review, Criterion criterion) {
-        return switch (criterion) {
-            case GAMEPLAY     -> review.getGameplayScore()    != null ? review.getGameplayScore()    : 0;
-            case GRAPHICS     -> review.getGraphicsScore()    != null ? review.getGraphicsScore()    : 0;
-            case SOUND        -> review.getSoundScore()       != null ? review.getSoundScore()       : 0;
-            case STORY        -> review.getStoryScore()       != null ? review.getStoryScore()       : 0;
-            case REPLAY_VALUE -> review.getReplayValueScore() != null ? review.getReplayValueScore() : 0;
+    private record Weights(double gameplay, double graphics, double sound, double story, double replayValue) {}
+
+    private static Weights weightsFor(RatingProfile profile) {
+        return switch (profile) {
+            case DEFAULT -> new Weights(
+                    WEIGHT_GAMEPLAY, WEIGHT_GRAPHICS, WEIGHT_SOUND, WEIGHT_STORY, WEIGHT_REPLAY_VALUE
+            );
+            case NARRATIVE -> new Weights(
+                    NARR_WEIGHT_GAMEPLAY, NARR_WEIGHT_GRAPHICS, NARR_WEIGHT_SOUND, NARR_WEIGHT_STORY, NARR_WEIGHT_REPLAY_VALUE
+            );
+            case MULTIPLAYER -> new Weights(
+                    MP_WEIGHT_GAMEPLAY, MP_WEIGHT_GRAPHICS, MP_WEIGHT_SOUND, MP_WEIGHT_STORY, MP_WEIGHT_REPLAY_VALUE
+            );
         };
     }
 

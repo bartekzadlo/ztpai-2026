@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import pl.edu.pk.gamelibrary.review.Review;
+import pl.edu.pk.gamelibrary.review.RatingProfile;
 
 import java.util.Collections;
 import java.util.List;
@@ -131,6 +132,43 @@ class RatingCalculatorTest {
             double result = ratingCalculator.calculateWeightedScore(review);
 
             assertEquals(7.2, result, 0.001);
+        }
+
+        @Test
+        @DisplayName("pomija storyScore gdy jest N/A (null) i renormalizuje wagi")
+        void calculateWeightedScore_shouldRenormalizeWhenStoryIsNull() {
+            // DEFAULT bez story: (9*0.30 + 8*0.20 + 9*0.15 + 8*0.15) / 0.80
+            // = (2.7 + 1.6 + 1.35 + 1.2) / 0.8 = 6.85 / 0.8 = 8.5625 -> 8.6
+            Review review = buildReview(9, 8, 9, null, 8);
+
+            double result = ratingCalculator.calculateWeightedScore(review);
+
+            assertEquals(8.6, result, 0.001);
+        }
+
+        @Test
+        @DisplayName("dla profilu MULTIPLAYER ignoruje story (waga 0)")
+        void calculateWeightedScore_shouldIgnoreStoryInMultiplayerProfile() {
+            Review review = buildReview(8, 6, 7, 1, 5);
+            review.setRatingProfile(RatingProfile.MULTIPLAYER);
+
+            // MP: gameplay 0.40, graphics 0.20, sound 0.15, replay 0.25 (story 0.00)
+            // 8*0.40 + 6*0.20 + 7*0.15 + 5*0.25 = 3.2 + 1.2 + 1.05 + 1.25 = 6.7
+            double result = ratingCalculator.calculateWeightedScore(review);
+
+            assertEquals(6.7, result, 0.001);
+        }
+
+        @Test
+        @DisplayName("w profilu NARRATIVE wymaga storyScore")
+        void calculateWeightedScore_shouldRequireStoryInNarrativeProfile() {
+            Review review = buildReview(8, 6, 7, null, 5);
+            review.setRatingProfile(RatingProfile.NARRATIVE);
+
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> ratingCalculator.calculateWeightedScore(review));
+
+            assertTrue(ex.getMessage().contains("story"));
         }
 
         @Test

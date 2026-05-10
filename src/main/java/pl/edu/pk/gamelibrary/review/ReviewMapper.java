@@ -14,6 +14,7 @@ public class ReviewMapper {
         r.setSoundScore(req.getSoundScore());
         r.setStoryScore(req.getStoryScore());
         r.setReplayValueScore(req.getReplayValueScore());
+        r.setRatingProfile(req.getRatingProfile());
         return r;
     }
 
@@ -32,6 +33,7 @@ public class ReviewMapper {
         res.setStoryScore(r.getStoryScore());
         res.setReplayValueScore(r.getReplayValueScore());
         res.setOverallScore(r.getOverallScore());
+        res.setRatingProfile(r.getRatingProfile());
         res.setCreatedAt(r.getCreatedAt());
         res.setUpdatedAt(r.getUpdatedAt());
         return res;

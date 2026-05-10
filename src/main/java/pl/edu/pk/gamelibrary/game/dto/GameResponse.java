@@ -1,5 +1,7 @@
 package pl.edu.pk.gamelibrary.game.dto;
 
+import pl.edu.pk.gamelibrary.review.RatingProfile;
+
 public class GameResponse {
 
     private Long id;
@@ -9,6 +11,9 @@ public class GameResponse {
     private String platform;
     private Integer releaseYear;
     private String coverUrl;
+
+    private boolean hasStory;
+    private RatingProfile defaultRatingProfile;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -30,4 +35,10 @@ public class GameResponse {
 
     public String getCoverUrl() { return coverUrl; }
     public void setCoverUrl(String coverUrl) { this.coverUrl = coverUrl; }
+
+    public boolean isHasStory() { return hasStory; }
+    public void setHasStory(boolean hasStory) { this.hasStory = hasStory; }
+
+    public RatingProfile getDefaultRatingProfile() { return defaultRatingProfile; }
+    public void setDefaultRatingProfile(RatingProfile defaultRatingProfile) { this.defaultRatingProfile = defaultRatingProfile; }
 }

@@ -13,6 +13,13 @@ public class GameMapper {
         g.setPlatform(req.getPlatform());
         g.setReleaseYear(req.getReleaseYear());
         g.setCoverUrl(req.getCoverUrl());
+        // Pola opcjonalne (profil i "czy ma fabułę")
+        if (req.getHasStory() != null) {
+            g.setHasStory(req.getHasStory());
+        }
+        if (req.getDefaultRatingProfile() != null) {
+            g.setDefaultRatingProfile(req.getDefaultRatingProfile());
+        }
         return g;
     }
 
@@ -25,6 +32,8 @@ public class GameMapper {
         res.setPlatform(g.getPlatform());
         res.setReleaseYear(g.getReleaseYear());
         res.setCoverUrl(g.getCoverUrl());
+        res.setHasStory(g.isHasStory());
+        res.setDefaultRatingProfile(g.getDefaultRatingProfile());
         return res;
     }
 }

@@ -3,6 +3,7 @@ package pl.edu.pk.gamelibrary.review;
 import jakarta.persistence.*;
 import pl.edu.pk.gamelibrary.auth.model.AppUser;
 import pl.edu.pk.gamelibrary.game.Game;
+import pl.edu.pk.gamelibrary.util.RatingCalculator;
 
 import java.time.LocalDateTime;
 
@@ -67,7 +68,7 @@ public class Review {
     private Integer soundScore;
 
     /** Fabuła – narracja, postacie, scenariusz. */
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer storyScore;
 
     /** Regrywalność – zawartość, tryby gry, wartość za cenę. */
@@ -80,6 +81,11 @@ public class Review {
      */
     @Column(nullable = false)
     private Double overallScore;
+
+    /** Profil oceniania użyty do wyliczenia overallScore. */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private RatingProfile ratingProfile = RatingProfile.DEFAULT;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -107,17 +113,15 @@ public class Review {
      * Wagi odzwierciedlają priorytety typowe dla gier akcji/RPG.
      */
     public void recalculateOverallScore() {
+        if (ratingProfile == null) {
+            ratingProfile = RatingProfile.DEFAULT;
+        }
+        // Core kryteria wymagane przez API (fabuła może być N/A => null).
         if (gameplayScore != null && graphicsScore != null
-                && soundScore != null && storyScore != null
-                && replayValueScore != null) {
-            this.overallScore =
-                    gameplayScore    * 0.30 +
-                    graphicsScore    * 0.20 +
-                    soundScore       * 0.15 +
-                    storyScore       * 0.20 +
-                    replayValueScore * 0.15;
-            // Zaokrąglenie do 1 miejsca po przecinku
-            this.overallScore = Math.round(this.overallScore * 10.0) / 10.0;
+                && soundScore != null && replayValueScore != null) {
+            this.overallScore = RatingCalculator.calculateWeightedScore(
+                    gameplayScore, graphicsScore, soundScore, storyScore, replayValueScore, ratingProfile
+            );
         }
     }
 
@@ -165,6 +169,9 @@ public class Review {
     }
 
     public Double getOverallScore() { return overallScore; }
+
+    public RatingProfile getRatingProfile() { return ratingProfile; }
+    public void setRatingProfile(RatingProfile ratingProfile) { this.ratingProfile = ratingProfile; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

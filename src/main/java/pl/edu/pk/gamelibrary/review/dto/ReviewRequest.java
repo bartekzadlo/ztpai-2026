@@ -1,6 +1,7 @@
 package pl.edu.pk.gamelibrary.review.dto;
 
 import jakarta.validation.constraints.*;
+import pl.edu.pk.gamelibrary.review.RatingProfile;
 
 public class ReviewRequest {
 
@@ -30,10 +31,12 @@ public class ReviewRequest {
     @Max(value = 10, message = "Ocena nie może przekraczać 10")
     private Integer soundScore;
 
-    @NotNull(message = "Ocena fabuły jest wymagana")
     @Min(value = 1, message = "Ocena musi być co najmniej 1")
     @Max(value = 10, message = "Ocena nie może przekraczać 10")
     private Integer storyScore;
+
+    /** Opcjonalny profil oceniania (gdy null -> używany jest profil gry). */
+    private RatingProfile ratingProfile;
 
     @NotNull(message = "Ocena regrywalności jest wymagana")
     @Min(value = 1, message = "Ocena musi być co najmniej 1")
@@ -60,6 +63,9 @@ public class ReviewRequest {
 
     public Integer getStoryScore() { return storyScore; }
     public void setStoryScore(Integer storyScore) { this.storyScore = storyScore; }
+
+    public RatingProfile getRatingProfile() { return ratingProfile; }
+    public void setRatingProfile(RatingProfile ratingProfile) { this.ratingProfile = ratingProfile; }
 
     public Integer getReplayValueScore() { return replayValueScore; }
     public void setReplayValueScore(Integer replayValueScore) { this.replayValueScore = replayValueScore; }
