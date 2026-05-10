@@ -102,6 +102,34 @@ POST /api/auth/register
 }
 ```
 
+### Recenzje
+
+> Wszystkie endpointy wymagają nagłówka `Authorization: Bearer <token>`.
+> Autor recenzji jest pobierany z tokena JWT (nie trzeba przekazywać `authorId` w żądaniu).
+
+| Metoda | Endpoint                       | Opis                              |
+|--------|--------------------------------|-----------------------------------|
+| GET    | `/api/reviews/game/{gameId}`   | Lista recenzji dla gry            |
+| GET    | `/api/reviews/{id}`            | Szczegóły recenzji                |
+| GET    | `/api/reviews/game/{gameId}/average` | Średnia ocena gry (overall) |
+| POST   | `/api/reviews`                 | Dodaj recenzję (1 na grę / użytk.)|
+| PUT    | `/api/reviews/{id}`            | Edytuj recenzję (tylko autor)     |
+| DELETE | `/api/reviews/{id}`            | Usuń recenzję (tylko autor)       |
+
+**Przykład ciała zapytania (POST/PUT):**
+```json
+{
+  "gameId": 1,
+  "title": "Świetna gra",
+  "content": "Bardzo wciągająca rozgrywka i świetny klimat.",
+  "gameplayScore": 9,
+  "graphicsScore": 8,
+  "soundScore": 9,
+  "storyScore": 8,
+  "replayValueScore": 8
+}
+```
+
 ### Kody HTTP
 
 | Kod | Znaczenie                          |
@@ -136,10 +164,17 @@ src/
 │   │   ├── GameMapper.java
 │   │   ├── GameRepository.java
 │   │   └── GameService.java
+│   ├── review/
+│   │   ├── dto/          # ReviewRequest, ReviewResponse
+│   │   ├── Review.java   # Encja JPA
+│   │   ├── ReviewController.java
+│   │   ├── ReviewMapper.java
+│   │   ├── ReviewRepository.java
+│   │   └── ReviewService.java
 │   ├── security/         # JwtAuthFilter, JwtService, SecurityConfig
 │   └── util/             # RatingCalculator
 └── test/
-    └── ...               # GameServiceTest, RatingCalculatorTest
+    └── ...               # GameServiceTest, ReviewServiceTest, RatingCalculatorTest
 ```
 
 ---

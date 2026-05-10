@@ -3,28 +3,26 @@ package pl.edu.pk.gamelibrary.review;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import pl.edu.pk.gamelibrary.auth.repository.UserRepository;
+import pl.edu.pk.gamelibrary.exception.ResourceNotFoundException;
 import pl.edu.pk.gamelibrary.review.dto.ReviewRequest;
 import pl.edu.pk.gamelibrary.review.dto.ReviewResponse;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * REST API dla modułu recenzji.
- *
- * W docelowej implementacji authorId powinien być pobierany
- * z kontekstu bezpieczeństwa (Principal / JWT), tu przekazywany
- * jako nagłówek X-User-Id dla uproszczenia.
- */
 @RestController
 @RequestMapping("/api/reviews")
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final UserRepository userRepository;
 
-    public ReviewController(ReviewService reviewService) {
+    public ReviewController(ReviewService reviewService, UserRepository userRepository) {
         this.reviewService = reviewService;
+        this.userRepository = userRepository;
     }
 
     /** GET /api/reviews/game/{gameId} – wszystkie recenzje danej gry */
@@ -54,7 +52,8 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<ReviewResponse> createReview(
             @Valid @RequestBody ReviewRequest request,
-            @RequestHeader("X-User-Id") Long authorId) {
+            Authentication authentication) {
+        Long authorId = resolveAuthorId(authentication);
         Review created = reviewService.createReview(request, authorId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ReviewMapper.toResponse(created));
@@ -65,7 +64,8 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> updateReview(
             @PathVariable Long id,
             @Valid @RequestBody ReviewRequest request,
-            @RequestHeader("X-User-Id") Long authorId) {
+            Authentication authentication) {
+        Long authorId = resolveAuthorId(authentication);
         Review updated = reviewService.updateReview(id, request, authorId);
         return ResponseEntity.ok(ReviewMapper.toResponse(updated));
     }
@@ -74,8 +74,16 @@ public class ReviewController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(
             @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long authorId) {
+            Authentication authentication) {
+        Long authorId = resolveAuthorId(authentication);
         reviewService.deleteReview(id, authorId);
         return ResponseEntity.noContent().build();
+    }
+
+    private Long resolveAuthorId(Authentication authentication) {
+        String username = authentication.getName();
+        return userRepository.findByUsername(username)
+                .map(u -> u.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Użytkownik", "username=" + username));
     }
 }
