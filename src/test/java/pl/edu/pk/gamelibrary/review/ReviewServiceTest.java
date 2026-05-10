@@ -14,8 +14,10 @@ import pl.edu.pk.gamelibrary.exception.ResourceNotFoundException;
 import pl.edu.pk.gamelibrary.game.Game;
 import pl.edu.pk.gamelibrary.game.GameRepository;
 import pl.edu.pk.gamelibrary.review.dto.ReviewRequest;
+import pl.edu.pk.gamelibrary.review.dto.GameRatingStatsResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -444,6 +446,51 @@ class ReviewServiceTest {
                     () -> reviewService.getAverageScoreForGame(99L));
 
             verify(reviewRepository, never()).findAverageOverallScoreByGameId(any());
+        }
+    }
+
+    // ================================================================ getRatingStatsForGame
+
+    @Nested
+    @DisplayName("getRatingStatsForGame")
+    class GetRatingStatsForGame {
+
+        @Test
+        @DisplayName("zwraca statystyki (count/avg/histogram) gdy gra istnieje")
+        void getRatingStats_shouldReturnStats() {
+            // given
+            when(gameRepository.existsById(1L)).thenReturn(true);
+
+            Review r1 = buildReview(buildGame(1L, "G1"), buildUser(10L, "u1"), 10, 10, 10, 10, 10); // overall ~10
+            Review r2 = buildReview(buildGame(1L, "G1"), buildUser(11L, "u2"), 8, 8, 8, 8, 8);       // overall ~8
+            when(reviewRepository.findByGameId(1L)).thenReturn(List.of(r1, r2));
+
+            // when
+            GameRatingStatsResponse stats = reviewService.getRatingStatsForGame(1L);
+
+            // then
+            assertNotNull(stats);
+            assertEquals(1L, stats.getGameId());
+            assertEquals(2, stats.getRatingCount());
+            assertTrue(stats.getAverageOverallScore() > 0.0);
+
+            Map<Integer, Long> hist = stats.getOverallScoreHistogram();
+            assertNotNull(hist);
+            assertEquals(10, hist.size(), "Histogram powinien zawierać klucze 1..10");
+            assertEquals(1L, hist.get(10));
+            assertEquals(1L, hist.get(8));
+        }
+
+        @Test
+        @DisplayName("rzuca ResourceNotFoundException gdy gra nie istnieje")
+        void getRatingStats_shouldThrow_whenGameNotFound() {
+            // given
+            when(gameRepository.existsById(99L)).thenReturn(false);
+
+            // when / then
+            assertThrows(ResourceNotFoundException.class,
+                    () -> reviewService.getRatingStatsForGame(99L));
+            verify(reviewRepository, never()).findByGameId(any());
         }
     }
 

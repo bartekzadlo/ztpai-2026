@@ -83,7 +83,7 @@ POST /api/auth/register
 
 ### Gry
 
-> Wszystkie endpointy wymagają nagłówka `Authorization: Bearer <token>`
+> Odczyt jest publiczny. Zapis/edycja/usuwanie wymaga roli `ADMIN`.
 
 | Metoda | Endpoint          | Opis                     | Rola       |
 |--------|-------------------|--------------------------|------------|
@@ -92,6 +92,29 @@ POST /api/auth/register
 | POST   | `/api/games`      | Dodaj nową grę           | ADMIN      |
 | PUT    | `/api/games/{id}` | Zaktualizuj grę          | ADMIN      |
 | DELETE | `/api/games/{id}` | Usuń grę                 | ADMIN      |
+
+**GET `/api/games` – query params (paginacja + filtrowanie + sortowanie):**
+
+- `page` (domyślnie `0`)
+- `size` (domyślnie `20`)
+- `sort` (domyślnie `title,asc`) – format: `pole,kierunek` (np. `releaseYear,desc`)
+- `title` (opcjonalnie) – wyszukiwanie po tytule (contains, case-insensitive)
+- `genre` (opcjonalnie)
+- `platform` (opcjonalnie)
+- `releaseYearFrom` / `releaseYearTo` (opcjonalnie)
+- `hasStory` (opcjonalnie)
+
+**Odpowiedź GET `/api/games` (PagedResponse):**
+
+```json
+{
+  "items": [ { "id": 1, "title": "..." } ],
+  "page": 0,
+  "size": 20,
+  "totalItems": 123,
+  "totalPages": 7
+}
+```
 
 **Przykład ciała zapytania (POST/PUT):**
 ```json
@@ -117,9 +140,28 @@ POST /api/auth/register
 | GET    | `/api/reviews/game/{gameId}`   | Lista recenzji dla gry            |
 | GET    | `/api/reviews/{id}`            | Szczegóły recenzji                |
 | GET    | `/api/reviews/game/{gameId}/average` | Średnia ocena gry (overall) |
+| GET    | `/api/reviews/game/{gameId}/stats` | Statystyki ocen (count/avg/histogram/średnie kryteriów) |
 | POST   | `/api/reviews`                 | Dodaj recenzję (1 na grę / użytk.)|
 | PUT    | `/api/reviews/{id}`            | Edytuj recenzję (tylko autor)     |
 | DELETE | `/api/reviews/{id}`            | Usuń recenzję (tylko autor)       |
+
+**GET `/api/reviews/game/{gameId}` – query params (paginacja + sortowanie):**
+
+- `page` (domyślnie `0`)
+- `size` (domyślnie `20`)
+- `sort` (domyślnie `createdAt,desc`) – format: `pole,kierunek` (np. `overallScore,desc`)
+
+**Odpowiedź GET `/api/reviews/game/{gameId}` (PagedResponse):**
+
+```json
+{
+  "items": [ { "id": 1, "gameId": 1, "overallScore": 8.5 } ],
+  "page": 0,
+  "size": 20,
+  "totalItems": 12,
+  "totalPages": 1
+}
+```
 
 ### Admin
 
@@ -128,6 +170,28 @@ POST /api/auth/register
 | Metoda | Endpoint             | Opis                              |
 |--------|----------------------|-----------------------------------|
 | POST   | `/api/admin/users`   | Utwórz użytkownika (USER/ADMIN)   |
+
+### Biblioteka użytkownika
+
+> Endpointy wymagają nagłówka `Authorization: Bearer <token>`.
+
+| Metoda | Endpoint             | Opis |
+|--------|----------------------|------|
+| GET    | `/api/library`       | Lista pozycji w bibliotece zalogowanego użytkownika (paginacja/filtry) |
+| PUT    | `/api/library`       | Dodaje lub aktualizuje pozycję (upsert) |
+| DELETE | `/api/library/{gameId}` | Usuwa grę z biblioteki |
+
+**Przykład upsert (PUT `/api/library`):**
+
+```json
+{
+  "gameId": 1,
+  "status": "PLAYING",
+  "favorite": true,
+  "owned": true,
+  "hoursPlayed": 12
+}
+```
 
 **Przykład ciała zapytania (POST/PUT):**
 ```json

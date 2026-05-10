@@ -1,5 +1,7 @@
 package pl.edu.pk.gamelibrary.review;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.edu.pk.gamelibrary.auth.model.AppUser;
 import pl.edu.pk.gamelibrary.auth.repository.UserRepository;
@@ -8,8 +10,12 @@ import pl.edu.pk.gamelibrary.game.Game;
 import pl.edu.pk.gamelibrary.game.GameRepository;
 import pl.edu.pk.gamelibrary.review.RatingProfile;
 import pl.edu.pk.gamelibrary.review.dto.ReviewRequest;
+import pl.edu.pk.gamelibrary.review.dto.GameRatingStatsResponse;
+import pl.edu.pk.gamelibrary.util.RatingCalculator;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReviewService {
@@ -36,6 +42,13 @@ public class ReviewService {
             throw new ResourceNotFoundException("Gra", gameId);
         }
         return reviewRepository.findByGameId(gameId);
+    }
+
+    public Page<Review> getReviewsByGame(Long gameId, Pageable pageable) {
+        if (!gameRepository.existsById(gameId)) {
+            throw new ResourceNotFoundException("Gra", gameId);
+        }
+        return reviewRepository.findByGameId(gameId, pageable);
     }
 
     /**
@@ -150,6 +163,27 @@ public class ReviewService {
                 .orElse(0.0);
     }
 
+    public GameRatingStatsResponse getRatingStatsForGame(Long gameId) {
+        if (!gameRepository.existsById(gameId)) {
+            throw new ResourceNotFoundException("Gra", gameId);
+        }
+
+        List<Review> reviews = reviewRepository.findByGameId(gameId);
+
+        RatingCalculator calc = new RatingCalculator();
+        GameRatingStatsResponse res = new GameRatingStatsResponse();
+        res.setGameId(gameId);
+        res.setRatingCount(reviews.size());
+        res.setAverageOverallScore(calc.calculateAverageFromReviews(reviews));
+        res.setAverageGameplayScore(calc.calculateCriterionAverage(reviews, RatingCalculator.Criterion.GAMEPLAY));
+        res.setAverageGraphicsScore(calc.calculateCriterionAverage(reviews, RatingCalculator.Criterion.GRAPHICS));
+        res.setAverageSoundScore(calc.calculateCriterionAverage(reviews, RatingCalculator.Criterion.SOUND));
+        res.setAverageStoryScore(calc.calculateCriterionAverage(reviews, RatingCalculator.Criterion.STORY));
+        res.setAverageReplayValueScore(calc.calculateCriterionAverage(reviews, RatingCalculator.Criterion.REPLAY_VALUE));
+        res.setOverallScoreHistogram(buildOverallHistogram(reviews));
+        return res;
+    }
+
     // ──────────────────────────────────────────────
     // Pomocnicze
     // ──────────────────────────────────────────────
@@ -205,5 +239,21 @@ public class ReviewService {
             throw new IllegalArgumentException(
                     "Ocena '" + name + "' musi być w zakresie 1–10, otrzymano: " + value);
         }
+    }
+
+    private Map<Integer, Long> buildOverallHistogram(List<Review> reviews) {
+        Map<Integer, Long> histogram = new LinkedHashMap<>();
+        for (int i = 1; i <= 10; i++) {
+            histogram.put(i, 0L);
+        }
+        for (Review r : reviews) {
+            Double score = r.getOverallScore();
+            if (score == null) continue;
+            int bucket = (int) Math.round(score);
+            if (bucket < 1) bucket = 1;
+            if (bucket > 10) bucket = 10;
+            histogram.put(bucket, histogram.get(bucket) + 1);
+        }
+        return histogram;
     }
 }

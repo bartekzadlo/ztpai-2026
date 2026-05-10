@@ -1,5 +1,7 @@
 package pl.edu.pk.gamelibrary.game;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.edu.pk.gamelibrary.exception.ResourceNotFoundException;
 import pl.edu.pk.gamelibrary.review.RatingProfile;
@@ -17,6 +19,10 @@ public class GameService {
 
     public List<Game> getAllGames() {
         return gameRepository.findAll();
+    }
+
+    public Page<Game> searchGames(GameSearchCriteria criteria, Pageable pageable) {
+        return gameRepository.findAll(GameSpecifications.byCriteria(criteria), pageable);
     }
 
     /**

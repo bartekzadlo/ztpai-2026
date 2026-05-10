@@ -1,9 +1,13 @@
 package pl.edu.pk.gamelibrary.game;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.edu.pk.gamelibrary.common.dto.PagedResponse;
 import pl.edu.pk.gamelibrary.game.dto.GameRequest;
 import pl.edu.pk.gamelibrary.game.dto.GameResponse;
 
@@ -21,10 +25,38 @@ public class GameController {
 
     /** GET /api/games -> 200 z listą wszystkich gier */
     @GetMapping
-    public List<GameResponse> getAll() {
-        return gameService.getAllGames().stream()
-                .map(GameMapper::toResponse)
-                .toList();
+    public PagedResponse<GameResponse> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "title,asc") String sort,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) String platform,
+            @RequestParam(required = false) Integer releaseYearFrom,
+            @RequestParam(required = false) Integer releaseYearTo,
+            @RequestParam(required = false) Boolean hasStory
+    ) {
+        Sort parsedSort = parseSort(sort);
+        PageRequest pageable = PageRequest.of(page, size, parsedSort);
+
+        GameSearchCriteria criteria = new GameSearchCriteria();
+        criteria.setTitle(title);
+        criteria.setGenre(genre);
+        criteria.setPlatform(platform);
+        criteria.setReleaseYearFrom(releaseYearFrom);
+        criteria.setReleaseYearTo(releaseYearTo);
+        criteria.setHasStory(hasStory);
+
+        Page<GameResponse> result = gameService.searchGames(criteria, pageable)
+                .map(GameMapper::toResponse);
+
+        return new PagedResponse<>(
+                result.getContent(),
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages()
+        );
     }
 
     /** GET /api/games/{id} -> 200 lub 404 */
@@ -55,5 +87,16 @@ public class GameController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         gameService.deleteGame(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private Sort parseSort(String sort) {
+        if (sort == null || sort.isBlank()) {
+            return Sort.by(Sort.Direction.ASC, "title");
+        }
+        String[] parts = sort.split(",", 2);
+        String field = parts[0].trim();
+        String dir = parts.length > 1 ? parts[1].trim() : "asc";
+        Sort.Direction direction = "desc".equalsIgnoreCase(dir) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        return Sort.by(direction, field);
     }
 }
