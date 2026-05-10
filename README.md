@@ -30,7 +30,7 @@ Aplikacja umożliwia przeglądanie i zarządzanie kolekcją gier z podziałem na
 
 ```bash
 # 1. Sklonuj repozytorium
-git clone https://github.com/<twoj-username>/game-library-api.git
+git clone https://github.com/bartekzadlo/game-library-api.git
 cd game-library-api
 
 # 2. Uruchom aplikację
