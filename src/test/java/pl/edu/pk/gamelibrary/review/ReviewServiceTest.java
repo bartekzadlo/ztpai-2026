@@ -499,7 +499,7 @@ class ReviewServiceTest {
     // ──────────────────────────────────────────────
 
     private static Game buildGame(Long id, String title) {
-        Game g = new Game(title, "opis", "RPG", "PC", 2020, null);
+        Game g = new Game(title, "opis", List.of("RPG"), List.of("PC"), 2020, null);
         setGameId(g, id);
         return g;
     }

@@ -1,0 +1,181 @@
+<div class="page-container" *ngIf="!loading && !error && game">
+
+  <div class="back-link"><a routerLink="/games">← Wróć do katalogu</a></div>
+
+  <!-- Hero -->
+  <div class="game-hero">
+    <div class="cover-wrap">
+      <img *ngIf="game.coverUrl" [src]="game.coverUrl" [alt]="game.title">
+      <div *ngIf="!game.coverUrl" class="no-cover">🎮</div>
+    </div>
+    <div class="hero-info">
+      <div class="badges">
+        <span class="badge genre" *ngFor="let g of game.genres">{{ g }}</span>
+        <span class="badge platform" *ngFor="let p of game.platforms">{{ p }}</span>
+        <span class="badge story" *ngIf="game.hasStory">📖 Ma fabułę</span>
+      </div>
+      <h1>{{ game.title }}</h1>
+      <div class="release-year">{{ game.releaseYear }}</div>
+      <p class="description">{{ game.description }}</p>
+
+      <!-- Stats -->
+      <div class="score-block" *ngIf="stats && stats.reviewCount > 0">
+        <div class="overall-score" [style.color]="scoreColor(stats.overallAverage)">
+          {{ stats.overallAverage | number:'1.1-1' }}
+        </div>
+        <div class="score-label">Ocena ogólna<br><small>{{ stats.reviewCount }} recenzji</small></div>
+      </div>
+      <div class="score-block empty" *ngIf="!stats || stats.reviewCount === 0">
+        Brak ocen
+      </div>
+
+      <!-- Library action -->
+      <div class="library-actions" *ngIf="isLoggedIn">
+        <label>Dodaj do biblioteki:</label>
+        <div class="status-buttons">
+          <button *ngFor="let s of libraryStatuses"
+                  [class.active]="libraryStatus === s"
+                  (click)="addToLibrary(s)">
+            {{ statusLabels[s] }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin actions -->
+      <div class="admin-actions" *ngIf="isAdmin">
+        <a [routerLink]="['/games', game.id, 'edit']" class="btn-edit">✏️ Edytuj</a>
+        <button class="btn-delete" (click)="deleteGame()">🗑️ Usuń grę</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score breakdown -->
+  <div class="score-breakdown" *ngIf="stats && stats.reviewCount > 0">
+    <h2>Szczegółowe oceny</h2>
+    <div class="score-bars">
+      <div class="score-bar-item">
+        <span>Rozgrywka</span>
+        <div class="bar"><div class="fill" [style.width.%]="stats.gameplayAverage * 10" [style.background]="scoreColor(stats.gameplayAverage)"></div></div>
+        <span class="val">{{ stats.gameplayAverage | number:'1.1-1' }}</span>
+      </div>
+      <div class="score-bar-item">
+        <span>Grafika</span>
+        <div class="bar"><div class="fill" [style.width.%]="stats.graphicsAverage * 10" [style.background]="scoreColor(stats.graphicsAverage)"></div></div>
+        <span class="val">{{ stats.graphicsAverage | number:'1.1-1' }}</span>
+      </div>
+      <div class="score-bar-item">
+        <span>Dźwięk</span>
+        <div class="bar"><div class="fill" [style.width.%]="stats.soundAverage * 10" [style.background]="scoreColor(stats.soundAverage)"></div></div>
+        <span class="val">{{ stats.soundAverage | number:'1.1-1' }}</span>
+      </div>
+      <div class="score-bar-item" *ngIf="game.hasStory && stats.storyAverage">
+        <span>Fabuła</span>
+        <div class="bar"><div class="fill" [style.width.%]="stats.storyAverage * 10" [style.background]="scoreColor(stats.storyAverage)"></div></div>
+        <span class="val">{{ stats.storyAverage | number:'1.1-1' }}</span>
+      </div>
+      <div class="score-bar-item">
+        <span>Regrywalność</span>
+        <div class="bar"><div class="fill" [style.width.%]="stats.replayValueAverage * 10" [style.background]="scoreColor(stats.replayValueAverage)"></div></div>
+        <span class="val">{{ stats.replayValueAverage | number:'1.1-1' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews section -->
+  <div class="reviews-section">
+    <div class="reviews-header">
+      <h2>Recenzje</h2>
+      <button *ngIf="isLoggedIn && !showReviewForm" class="btn-primary" (click)="showReviewForm = true; editingReviewId = null; resetReviewForm()">
+        + Napisz recenzję
+      </button>
+    </div>
+
+    <!-- Review form -->
+    <div class="review-form-card" *ngIf="showReviewForm && isLoggedIn">
+      <h3>{{ editingReviewId ? 'Edytuj recenzję' : 'Nowa recenzja' }}</h3>
+      <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+        <div class="field">
+          <label>Tytuł recenzji</label>
+          <input type="text" formControlName="title" placeholder="Np. Świetna gra!">
+        </div>
+        <div class="field">
+          <label>Treść</label>
+          <textarea formControlName="content" rows="4" placeholder="Opisz swoje wrażenia..."></textarea>
+        </div>
+        <div class="scores-grid">
+          <div class="field">
+            <label>Rozgrywka (1-10)</label>
+            <input type="number" formControlName="gameplayScore" min="1" max="10">
+          </div>
+          <div class="field">
+            <label>Grafika (1-10)</label>
+            <input type="number" formControlName="graphicsScore" min="1" max="10">
+          </div>
+          <div class="field">
+            <label>Dźwięk (1-10)</label>
+            <input type="number" formControlName="soundScore" min="1" max="10">
+          </div>
+          <div class="field" *ngIf="game.hasStory">
+            <label>Fabuła (1-10)</label>
+            <input type="number" formControlName="storyScore" min="1" max="10">
+          </div>
+          <div class="field">
+            <label>Regrywalność (1-10)</label>
+            <input type="number" formControlName="replayValueScore" min="1" max="10">
+          </div>
+        </div>
+        <div class="error-msg" *ngIf="reviewError">{{ reviewError }}</div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" (click)="showReviewForm = false">Anuluj</button>
+          <button type="submit" class="btn-primary" [disabled]="reviewForm.invalid || reviewLoading">
+            {{ reviewLoading ? 'Zapisywanie...' : 'Zapisz recenzję' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Review list -->
+    <div class="review-list">
+      <div class="review-card" *ngFor="let r of reviews">
+        <div class="review-header">
+          <div>
+            <span class="review-author">{{ r.authorUsername }}</span>
+            <span class="review-date">{{ r.createdAt | date:'dd.MM.yyyy' }}</span>
+          </div>
+          <div class="review-score" [style.color]="scoreColor(r.overallScore)">
+            {{ r.overallScore | number:'1.1-1' }}
+          </div>
+        </div>
+        <h4 class="review-title">{{ r.title }}</h4>
+        <p class="review-content">{{ r.content }}</p>
+        <div class="review-scores">
+          <span>🎮 {{ r.gameplayScore }}</span>
+          <span>🎨 {{ r.graphicsScore }}</span>
+          <span>🎵 {{ r.soundScore }}</span>
+          <span *ngIf="r.storyScore">📖 {{ r.storyScore }}</span>
+          <span>🔁 {{ r.replayValueScore }}</span>
+        </div>
+        <div class="review-actions" *ngIf="isLoggedIn">
+          <button class="btn-sm-edit" (click)="editReview(r)">✏️ Edytuj</button>
+          <button class="btn-sm-del" (click)="deleteReview(r.id)">🗑️ Usuń</button>
+        </div>
+      </div>
+
+      <div class="empty-reviews" *ngIf="reviews.length === 0">
+        <p>Brak recenzji. Bądź pierwszy!</p>
+      </div>
+    </div>
+
+    <app-pagination [currentPage]="reviewPage" [totalPages]="reviewTotalPages" (pageChange)="loadReviews($event)"></app-pagination>
+  </div>
+</div>
+
+<div class="loading-state" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Wczytywanie...</p>
+</div>
+
+<div class="error-state" *ngIf="error">
+  <p>⚠️ {{ error }}</p>
+  <a routerLink="/games">← Wróć do listy</a>
+</div>

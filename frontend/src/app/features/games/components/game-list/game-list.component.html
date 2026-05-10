@@ -1,0 +1,71 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>🎮 Katalog gier</h1>
+    <span class="total-count" *ngIf="!loading">{{ totalItems }} gier</span>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <input class="search-input" type="text" placeholder="🔍 Szukaj gry..." (input)="onSearch($any($event.target).value)">
+
+    <select [(ngModel)]="filters.genre" (change)="onFilterChange()">
+      <option value="">Gatunek</option>
+      <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
+    </select>
+
+    <select [(ngModel)]="filters.platform" (change)="onFilterChange()">
+      <option value="">Platforma</option>
+      <option *ngFor="let p of platforms" [value]="p">{{ p }}</option>
+    </select>
+
+    <select [(ngModel)]="filters.sort" (change)="onFilterChange()">
+      <option *ngFor="let s of sortOptions" [value]="s.value">{{ s.label }}</option>
+    </select>
+
+    <button class="btn-clear" (click)="clearFilters()" title="Wyczyść filtry">✕</button>
+
+    <a *ngIf="isAdmin" routerLink="/games/new" class="btn-add">+ Dodaj grę</a>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Wczytywanie gier...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-state" *ngIf="error && !loading">
+    <p>⚠️ {{ error }}</p>
+    <button (click)="load()">Spróbuj ponownie</button>
+  </div>
+
+  <!-- Grid -->
+  <div class="games-grid" *ngIf="!loading && !error">
+    <div class="game-card" *ngFor="let game of games" [routerLink]="['/games', game.id]">
+      <div class="game-cover">
+        <img *ngIf="game.coverUrl" [src]="game.coverUrl" [alt]="game.title" loading="lazy">
+        <div *ngIf="!game.coverUrl" class="no-cover">🎮</div>
+      </div>
+      <div class="game-info">
+        <h3 class="game-title">{{ game.title }}</h3>
+        <div class="game-meta">
+          <span class="badge genre" *ngFor="let g of game.genres">{{ g }}</span>
+          <span class="badge platform" *ngFor="let p of game.platforms">{{ p }}</span>
+        </div>
+        <div class="game-year">{{ game.releaseYear }}</div>
+        <p class="game-desc">{{ game.description | slice:0:80 }}{{ (game.description?.length ?? 0) > 80 ? '...' : '' }}</p>
+      </div>
+      <div class="game-actions" *ngIf="isAdmin" (click)="$event.stopPropagation()">
+        <a [routerLink]="['/games', game.id, 'edit']" class="btn-edit">✏️ Edytuj</a>
+        <button class="btn-delete" (click)="deleteGame(game.id, game.title)">🗑️ Usuń</button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="games.length === 0">
+      <p>🔍 Brak gier spełniających kryteria</p>
+      <button (click)="clearFilters()">Wyczyść filtry</button>
+    </div>
+  </div>
+
+  <app-pagination [currentPage]="page" [totalPages]="totalPages" (pageChange)="onPageChange($event)"></app-pagination>
+</div>

@@ -1,0 +1,31 @@
+.page-container { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem; }
+.page-header { margin-bottom: 1.5rem; h1 { font-size: 1.8rem; color: var(--text-primary); } }
+
+.filter-bar { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.status-filter {
+  background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary);
+  padding: .4rem .9rem; border-radius: 20px; cursor: pointer; font-size: .85rem; transition: all .2s;
+  &.active, &:hover { border-color: var(--accent); color: var(--accent); background: rgba(99,102,241,.1); }
+}
+
+.loading-state, .error-state { text-align: center; padding: 3rem; color: var(--text-secondary); }
+.spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.library-grid { display: flex; flex-direction: column; gap: .75rem; }
+.library-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem 1.25rem; cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; gap: 1rem;
+  &:hover { border-color: var(--accent); transform: translateX(4px); }
+}
+.card-main { flex: 1; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.game-title { font-weight: 700; color: var(--text-primary); }
+.status-badge { font-size: .78rem; padding: .25rem .7rem; border-radius: 20px; }
+.card-meta { display: flex; gap: .75rem; color: var(--text-muted); font-size: .8rem; }
+.btn-remove {
+  background: none; border: none; cursor: pointer; opacity: .4; font-size: 1.1rem;
+  padding: .3rem; border-radius: 6px; transition: opacity .2s;
+  &:hover { opacity: 1; }
+}
+.empty-state { text-align: center; padding: 3rem; color: var(--text-secondary); a { color: var(--accent); } }

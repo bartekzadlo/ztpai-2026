@@ -55,6 +55,10 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // Statyczne zasoby frontendu Angular
+                        .requestMatchers("/", "/index.html", "/games", "/games/**",
+                                "/auth/**", "/library", "/*.js", "/*.css",
+                                "/*.ico", "/*.json", "/assets/**").permitAll()
                         // Auth endpoints - publiczne
                         .requestMatchers("/api/auth/**").permitAll()
                         // H2 console - tylko dev

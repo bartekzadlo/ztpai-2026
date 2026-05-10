@@ -2,13 +2,15 @@ package pl.edu.pk.gamelibrary.game.dto;
 
 import pl.edu.pk.gamelibrary.review.RatingProfile;
 
+import java.util.List;
+
 public class GameResponse {
 
     private Long id;
     private String title;
     private String description;
-    private String genre;
-    private String platform;
+    private List<String> genres;
+    private List<String> platforms;
     private Integer releaseYear;
     private String coverUrl;
 
@@ -24,11 +26,11 @@ public class GameResponse {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getGenre() { return genre; }
-    public void setGenre(String genre) { this.genre = genre; }
+    public List<String> getGenres() { return genres; }
+    public void setGenres(List<String> genres) { this.genres = genres; }
 
-    public String getPlatform() { return platform; }
-    public void setPlatform(String platform) { this.platform = platform; }
+    public List<String> getPlatforms() { return platforms; }
+    public void setPlatforms(List<String> platforms) { this.platforms = platforms; }
 
     public Integer getReleaseYear() { return releaseYear; }
     public void setReleaseYear(Integer releaseYear) { this.releaseYear = releaseYear; }

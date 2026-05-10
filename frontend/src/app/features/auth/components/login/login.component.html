@@ -1,0 +1,29 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>🎮 Zaloguj się</h1>
+      <p>Witaj z powrotem!</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label>Nazwa użytkownika</label>
+        <input type="text" formControlName="username" placeholder="Wpisz nazwę użytkownika" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Hasło</label>
+        <input type="password" formControlName="password" placeholder="Wpisz hasło" autocomplete="current-password">
+      </div>
+
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+      <button type="submit" class="btn-primary" [disabled]="form.invalid || loading">
+        {{ loading ? 'Logowanie...' : 'Zaloguj się' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Nie masz konta? <a routerLink="/auth/register">Zarejestruj się</a>
+    </p>
+  </div>
+</div>

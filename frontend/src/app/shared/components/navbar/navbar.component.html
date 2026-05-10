@@ -1,0 +1,32 @@
+<nav class="navbar">
+  <div class="navbar-brand">
+    <a routerLink="/games" class="brand-link">
+      <span class="brand-icon">🎮</span>
+      <span class="brand-text">GameLibrary</span>
+    </a>
+  </div>
+
+  <button class="menu-toggle" (click)="menuOpen = !menuOpen">
+    <span></span><span></span><span></span>
+  </button>
+
+  <div class="navbar-menu" [class.open]="menuOpen">
+    <div class="nav-links">
+      <a routerLink="/games" routerLinkActive="active" (click)="menuOpen=false">Katalog</a>
+      <ng-container *ngIf="isLoggedIn$ | async">
+        <a routerLink="/library" routerLinkActive="active" (click)="menuOpen=false">Moja biblioteka</a>
+        <a *ngIf="isAdmin" routerLink="/games/new" routerLinkActive="active" (click)="menuOpen=false">+ Dodaj grę</a>
+      </ng-container>
+    </div>
+    <div class="nav-actions">
+      <ng-container *ngIf="isLoggedIn$ | async; else guestLinks">
+        <span class="username">👤 {{ username }}</span>
+        <button class="btn-logout" (click)="logout()">Wyloguj</button>
+      </ng-container>
+      <ng-template #guestLinks>
+        <a routerLink="/auth/login" class="btn-login" (click)="menuOpen=false">Zaloguj</a>
+        <a routerLink="/auth/register" class="btn-register" (click)="menuOpen=false">Rejestracja</a>
+      </ng-template>
+    </div>
+  </div>
+</nav>

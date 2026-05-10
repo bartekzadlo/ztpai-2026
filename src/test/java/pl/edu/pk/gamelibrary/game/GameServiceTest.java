@@ -50,7 +50,7 @@ class GameServiceTest {
         void getGameById_shouldReturnGame_whenFound() {
             // given
             Game mockGame = new Game("The Witcher 3", "RPG z otwartym światem",
-                    "RPG", "PC", 2015, null);
+                    List.of("RPG"), List.of("PC"), 2015, null);
             when(gameRepository.findById(1L)).thenReturn(Optional.of(mockGame));
 
             // when
@@ -60,7 +60,7 @@ class GameServiceTest {
             assertNotNull(result, "Zwrócona gra nie powinna być null");
             assertEquals("The Witcher 3", result.getTitle(),
                     "Tytuł gry powinien być 'The Witcher 3'");
-            assertEquals("RPG", result.getGenre());
+            assertEquals(List.of("RPG"), result.getGenres());
             assertEquals(2015, result.getReleaseYear());
 
             verify(gameRepository, times(1)).findById(1L);
@@ -103,8 +103,8 @@ class GameServiceTest {
         void getAllGames_shouldReturnListFromRepository() {
             // given
             List<Game> games = List.of(
-                    new Game("Game A", "opis A", "RPG", "PC", 2020, null),
-                    new Game("Game B", "opis B", "FPS", "PS5", 2021, null)
+                    new Game("Game A", "opis A", List.of("RPG"), List.of("PC"), 2020, null),
+                    new Game("Game B", "opis B", List.of("FPS"), List.of("PS5"), 2021, null)
             );
             when(gameRepository.findAll()).thenReturn(games);
 
@@ -133,8 +133,8 @@ class GameServiceTest {
         @DisplayName("zapisuje grę i zwraca ją z nadanym id")
         void createGame_shouldReturnSavedGameWithId() {
             // given
-            Game input = new Game("Cyberpunk 2077", "RPG przyszłości", "RPG", "PC", 2020, null);
-            Game saved = new Game("Cyberpunk 2077", "RPG przyszłości", "RPG", "PC", 2020, null);
+            Game input = new Game("Cyberpunk 2077", "RPG przyszłości", List.of("RPG"), List.of("PC"), 2020, null);
+            Game saved = new Game("Cyberpunk 2077", "RPG przyszłości", List.of("RPG"), List.of("PC"), 2020, null);
             setId(saved, 42L);
             when(gameRepository.save(any(Game.class))).thenReturn(saved);
 
@@ -156,7 +156,7 @@ class GameServiceTest {
         @DisplayName("rzuca IllegalArgumentException gdy title jest null")
         void createGame_shouldThrow_whenTitleIsNull() {
             // given
-            Game game = new Game(null, "opis", "RPG", "PC", 2020, null);
+            Game game = new Game(null, "opis", List.of("RPG"), List.of("PC"), 2020, null);
 
             // when / then
             IllegalArgumentException ex = assertThrows(
@@ -177,7 +177,7 @@ class GameServiceTest {
         @DisplayName("rzuca IllegalArgumentException gdy title jest pustym / białym stringiem")
         void createGame_shouldThrow_whenTitleIsBlank() {
             // given
-            Game game = new Game("   ", "opis", "RPG", "PC", 2020, null);
+            Game game = new Game("   ", "opis", List.of("RPG"), List.of("PC"), 2020, null);
 
             // when / then
             assertThrows(
@@ -196,7 +196,7 @@ class GameServiceTest {
         @DisplayName("rzuca IllegalArgumentException gdy title jest pustym stringiem \"\"")
         void createGame_shouldThrow_whenTitleIsEmptyString() {
             // given
-            Game game = new Game("", "opis", "RPG", "PC", 2020, null);
+            Game game = new Game("", "opis", List.of("RPG"), List.of("PC"), 2020, null);
 
             // when / then
             assertThrows(
@@ -222,9 +222,9 @@ class GameServiceTest {
         @DisplayName("aktualizuje i zwraca grę gdy id istnieje")
         void updateGame_shouldUpdateAndReturnGame_whenFound() {
             // given
-            Game existing = new Game("Stary Tytuł", "stary opis", "RPG", "PC", 2010, null);
+            Game existing = new Game("Stary Tytuł", "stary opis", List.of("RPG"), List.of("PC"), 2010, null);
             setId(existing, 1L);
-            Game updated = new Game("Nowy Tytuł", "nowy opis", "FPS", "PS5", 2022, "http://cover.jpg");
+            Game updated = new Game("Nowy Tytuł", "nowy opis", List.of("FPS"), List.of("PS5"), 2022, "http://cover.jpg");
 
             when(gameRepository.findById(1L)).thenReturn(Optional.of(existing));
             when(gameRepository.save(any(Game.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -235,8 +235,8 @@ class GameServiceTest {
             // then
             assertEquals("Nowy Tytuł", result.getTitle());
             assertEquals("nowy opis", result.getDescription());
-            assertEquals("FPS", result.getGenre());
-            assertEquals("PS5", result.getPlatform());
+            assertEquals(List.of("FPS"), result.getGenres());
+            assertEquals(List.of("PS5"), result.getPlatforms());
             assertEquals(2022, result.getReleaseYear());
             assertEquals("http://cover.jpg", result.getCoverUrl());
 
@@ -252,7 +252,7 @@ class GameServiceTest {
         void updateGame_shouldThrow_whenNotFound() {
             // given
             when(gameRepository.findById(99L)).thenReturn(Optional.empty());
-            Game updated = new Game("Tytuł", "opis", "RPG", "PC", 2020, null);
+            Game updated = new Game("Tytuł", "opis", List.of("RPG"), List.of("PC"), 2020, null);
 
             // when / then
             assertThrows(
@@ -278,7 +278,7 @@ class GameServiceTest {
         @DisplayName("usuwa grę gdy istnieje")
         void deleteGame_shouldDelete_whenFound() {
             // given
-            Game mockGame = new Game("Dark Souls", "Trudne RPG", "RPG", "PC", 2011, null);
+            Game mockGame = new Game("Dark Souls", "Trudne RPG", List.of("RPG"), List.of("PC"), 2011, null);
             setId(mockGame, 1L);
             when(gameRepository.findById(1L)).thenReturn(Optional.of(mockGame));
 

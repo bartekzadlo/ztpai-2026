@@ -9,17 +9,15 @@ public class GameMapper {
         Game g = new Game();
         g.setTitle(req.getTitle());
         g.setDescription(req.getDescription());
-        g.setGenre(req.getGenre());
-        g.setPlatform(req.getPlatform());
+        g.setGenres(req.getGenres());
+        g.setPlatforms(req.getPlatforms());
         g.setReleaseYear(req.getReleaseYear());
         g.setCoverUrl(req.getCoverUrl());
         // Pola opcjonalne (profil i "czy ma fabułę")
         if (req.getHasStory() != null) {
             g.setHasStory(req.getHasStory());
         }
-        if (req.getDefaultRatingProfile() != null) {
-            g.setDefaultRatingProfile(req.getDefaultRatingProfile());
-        }
+        g.setDefaultRatingProfile(req.getDefaultRatingProfile());
         return g;
     }
 
@@ -28,8 +26,8 @@ public class GameMapper {
         res.setId(g.getId());
         res.setTitle(g.getTitle());
         res.setDescription(g.getDescription());
-        res.setGenre(g.getGenre());
-        res.setPlatform(g.getPlatform());
+        res.setGenres(g.getGenres());
+        res.setPlatforms(g.getPlatforms());
         res.setReleaseYear(g.getReleaseYear());
         res.setCoverUrl(g.getCoverUrl());
         res.setHasStory(g.isHasStory());

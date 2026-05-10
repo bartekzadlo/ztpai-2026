@@ -1,0 +1,42 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>📚 Moja biblioteka</h1>
+  </div>
+
+  <div class="filter-bar">
+    <button class="status-filter" [class.active]="filterStatus === ''" (click)="filterStatus = ''">Wszystkie</button>
+    <button *ngFor="let s of statuses"
+            class="status-filter"
+            [class.active]="filterStatus === s"
+            [style.--sc]="statusColors[s]"
+            (click)="filterStatus = s">
+      {{ statusLabels[s] }}
+    </button>
+  </div>
+
+  <div class="loading-state" *ngIf="loading"><div class="spinner"></div><p>Wczytywanie...</p></div>
+  <div class="error-state" *ngIf="error && !loading"><p>⚠️ {{ error }}</p></div>
+
+  <div class="library-grid" *ngIf="!loading && !error">
+    <div class="library-card" *ngFor="let entry of filtered" [routerLink]="['/games', entry.gameId]">
+      <div class="card-main">
+        <div class="game-title">{{ entry.gameTitle }}</div>
+        <div class="status-badge" [style.background]="'rgba(99,102,241,.15)'" [style.color]="statusColors[entry.status]">
+          {{ statusLabels[entry.status] }}
+        </div>
+      </div>
+      <div class="card-meta">
+        <span *ngIf="entry.favorite">⭐ Ulubiona</span>
+        <span *ngIf="entry.owned">✅ Posiadana</span>
+        <span *ngIf="entry.hoursPlayed">⏱ {{ entry.hoursPlayed }}h</span>
+      </div>
+      <button class="btn-remove" (click)="remove(entry.gameId, entry.gameTitle); $event.stopPropagation()">🗑️</button>
+    </div>
+
+    <div class="empty-state" *ngIf="filtered.length === 0">
+      <p>Biblioteka jest pusta.<br>Przeglądaj <a routerLink="/games">katalog gier</a> i dodaj je do swojej kolekcji!</p>
+    </div>
+  </div>
+
+  <app-pagination [currentPage]="page" [totalPages]="totalPages" (pageChange)="onPageChange($event)"></app-pagination>
+</div>

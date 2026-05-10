@@ -1,0 +1,42 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>🕹️ Rejestracja</h1>
+      <p>Stwórz swoje konto</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label>Nazwa użytkownika</label>
+        <input type="text" formControlName="username" placeholder="Min. 3 znaki">
+        <span class="hint" *ngIf="form.get('username')?.touched && form.get('username')?.invalid">
+          Minimum 3 znaki
+        </span>
+      </div>
+      <div class="field">
+        <label>Hasło</label>
+        <input type="password" formControlName="password" placeholder="Min. 6 znaków">
+        <span class="hint" *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+          Minimum 6 znaków
+        </span>
+      </div>
+      <div class="field">
+        <label>Rola (dev)</label>
+        <select formControlName="role">
+          <option value="USER">USER</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
+      </div>
+
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+      <button type="submit" class="btn-primary" [disabled]="form.invalid || loading">
+        {{ loading ? 'Rejestracja...' : 'Zarejestruj się' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Masz już konto? <a routerLink="/auth/login">Zaloguj się</a>
+    </p>
+  </div>
+</div>

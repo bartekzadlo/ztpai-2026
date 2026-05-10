@@ -3,6 +3,8 @@ package pl.edu.pk.gamelibrary.game.dto;
 import jakarta.validation.constraints.*;
 import pl.edu.pk.gamelibrary.review.RatingProfile;
 
+import java.util.List;
+
 public class GameRequest {
 
     @NotBlank(message = "Tytuł gry nie może być pusty")
@@ -12,11 +14,13 @@ public class GameRequest {
     @Size(max = 1000, message = "Opis nie może przekraczać 1000 znaków")
     private String description;
 
-    @NotBlank(message = "Gatunek nie może być pusty")
-    private String genre;
+    @NotNull(message = "Lista gatunków nie może być pusta")
+    @Size(min = 1, message = "Gra musi mieć przynajmniej jeden gatunek")
+    private List<String> genres;
 
-    @NotBlank(message = "Platforma nie może być pusta")
-    private String platform;
+    @NotNull(message = "Lista platform nie może być pusta")
+    @Size(min = 1, message = "Gra musi mieć przynajmniej jedną platformę")
+    private List<String> platforms;
 
     @Min(value = 1950, message = "Rok wydania nie może być wcześniejszy niż 1950")
     @Max(value = 2100, message = "Rok wydania nie może być późniejszy niż 2100")
@@ -36,11 +40,11 @@ public class GameRequest {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getGenre() { return genre; }
-    public void setGenre(String genre) { this.genre = genre; }
+    public List<String> getGenres() { return genres; }
+    public void setGenres(List<String> genres) { this.genres = genres; }
 
-    public String getPlatform() { return platform; }
-    public void setPlatform(String platform) { this.platform = platform; }
+    public List<String> getPlatforms() { return platforms; }
+    public void setPlatforms(List<String> platforms) { this.platforms = platforms; }
 
     public Integer getReleaseYear() { return releaseYear; }
     public void setReleaseYear(Integer releaseYear) { this.releaseYear = releaseYear; }

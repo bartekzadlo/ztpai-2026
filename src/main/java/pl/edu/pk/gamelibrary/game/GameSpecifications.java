@@ -1,5 +1,6 @@
 package pl.edu.pk.gamelibrary.game;
 
+import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 
 public final class GameSpecifications {
@@ -14,10 +15,16 @@ public final class GameSpecifications {
             spec = spec.and((root, q, cb) -> cb.like(cb.lower(root.get("title")), like));
         }
         if (c.getGenre() != null && !c.getGenre().isBlank()) {
-            spec = spec.and((root, q, cb) -> cb.equal(cb.lower(root.get("genre")), c.getGenre().trim().toLowerCase()));
+            spec = spec.and((root, q, cb) -> {
+                Join<Game, String> genresJoin = root.join("genres");
+                return cb.equal(cb.lower(genresJoin), c.getGenre().trim().toLowerCase());
+            });
         }
         if (c.getPlatform() != null && !c.getPlatform().isBlank()) {
-            spec = spec.and((root, q, cb) -> cb.equal(cb.lower(root.get("platform")), c.getPlatform().trim().toLowerCase()));
+            spec = spec.and((root, q, cb) -> {
+                Join<Game, String> platformsJoin = root.join("platforms");
+                return cb.equal(cb.lower(platformsJoin), c.getPlatform().trim().toLowerCase());
+            });
         }
         if (c.getHasStory() != null) {
             spec = spec.and((root, q, cb) -> cb.equal(root.get("hasStory"), c.getHasStory()));

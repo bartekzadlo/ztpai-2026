@@ -1,9 +1,11 @@
 package pl.edu.pk.gamelibrary.game;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.edu.pk.gamelibrary.exception.ResourceNotFoundException;
+import pl.edu.pk.gamelibrary.library.UserGameRepository;
 import pl.edu.pk.gamelibrary.review.RatingProfile;
 
 import java.util.List;
@@ -12,9 +14,11 @@ import java.util.List;
 public class GameService {
 
     private final GameRepository gameRepository;
+    private final UserGameRepository userGameRepository;
 
-    public GameService(GameRepository gameRepository) {
+    public GameService(GameRepository gameRepository, UserGameRepository userGameRepository) {
         this.gameRepository = gameRepository;
+        this.userGameRepository = userGameRepository;
     }
 
     public List<Game> getAllGames() {
@@ -48,8 +52,8 @@ public class GameService {
         Game existing = getGameById(id);
         existing.setTitle(updated.getTitle());
         existing.setDescription(updated.getDescription());
-        existing.setGenre(updated.getGenre());
-        existing.setPlatform(updated.getPlatform());
+        existing.setGenres(updated.getGenres());
+        existing.setPlatforms(updated.getPlatforms());
         existing.setReleaseYear(updated.getReleaseYear());
         existing.setCoverUrl(updated.getCoverUrl());
         existing.setHasStory(updated.isHasStory());
@@ -57,8 +61,14 @@ public class GameService {
         return gameRepository.save(existing);
     }
 
+    @Transactional
     public void deleteGame(Long id) {
-        getGameById(id); // rzuci 404 jeśli brak
+        Game game = getGameById(id); // rzuci 404 jeśli brak
+        // Najpierw usuń wszystkie powiązane wpisy w bibliotekach użytkowników
+        userGameRepository.findAll((root, query, cb) ->
+            cb.equal(root.get("game"), game)
+        ).forEach(userGameRepository::delete);
+        // Następnie usuń grę
         gameRepository.deleteById(id);
     }
 }

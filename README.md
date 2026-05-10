@@ -29,18 +29,23 @@ Aplikacja umożliwia przeglądanie i zarządzanie kolekcją gier z podziałem na
 ### Kroki
 
 ```bash
-# 1. Sklonuj repozytorium
+# Sklonuj repozytorium
 git clone https://github.com/bartekzadlo/game-library-api.git
 cd game-library-api
 
-# 2. Uruchom aplikację
+# Zbuduj i uruchom (backend + frontend razem)
 ./mvnw spring-boot:run
-
-# 3. API dostępne pod adresem
-http://localhost:8080
 ```
 
 > **Windows:** użyj `mvnw.cmd spring-boot:run` zamiast `./mvnw spring-boot:run`
+
+> ⏳ Pierwsze uruchomienie trwa dłużej — Maven automatycznie pobiera Node.js i buduje Angular.
+
+Po uruchomieniu:
+- **Frontend:** `http://localhost:8080`
+- **API:** `http://localhost:8080/api`
+- **Swagger UI:** `http://localhost:8080/swagger-ui/index.html`
+- **H2 Console:** `http://localhost:8080/h2-console`
 
 ### Konsola H2 (baza danych)
 
@@ -274,3 +279,29 @@ Projekt zawiera testy jednostkowe dla `GameService` (Mockito) oraz `RatingCalcul
 Główna konfiguracja w `src/main/resources/application.properties`.
 
 > ⚠️ **Przed wdrożeniem produkcyjnym** zmień `jwt.secret` na bezpieczny klucz co najmniej 256-bitowy i zastąp H2 bazą danych produkcyjną (np. PostgreSQL).
+
+---
+
+## 🖥️ Frontend (Angular)
+
+Aplikacja frontendowa znajduje się w katalogu `frontend/`.
+
+### Uruchomienie
+
+```bash
+cd frontend
+npm install
+ng serve
+# → http://localhost:4200
+```
+
+> Backend musi działać na `http://localhost:8080` zanim uruchomisz frontend.
+
+### Funkcjonalności frontendu
+
+- Przeglądanie katalogu gier z filtrowaniem i paginacją
+- Szczegóły gry ze statystykami ocen
+- Rejestracja i logowanie (JWT)
+- Dodawanie recenzji (zalogowani użytkownicy)
+- Zarządzanie grami – CRUD (tylko ADMIN)
+- Prywatna biblioteka użytkownika

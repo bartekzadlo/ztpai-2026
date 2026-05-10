@@ -29,7 +29,7 @@ public class UserGame {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private LibraryStatus status = LibraryStatus.PLANNED;
+    private LibraryStatus status = LibraryStatus.PLAN_TO_PLAY;
 
     @Column(nullable = false)
     private boolean favorite = false;
@@ -67,7 +67,7 @@ public class UserGame {
     public void setGame(Game game) { this.game = game; }
 
     public LibraryStatus getStatus() { return status; }
-    public void setStatus(LibraryStatus status) { this.status = status != null ? status : LibraryStatus.PLANNED; }
+    public void setStatus(LibraryStatus status) { this.status = status != null ? status : LibraryStatus.PLAN_TO_PLAY; }
 
     public boolean isFavorite() { return favorite; }
     public void setFavorite(boolean favorite) { this.favorite = favorite; }

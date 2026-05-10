@@ -1,0 +1,66 @@
+<div class="page-container">
+  <div class="back-link"><a [routerLink]="editId ? ['/games', editId] : ['/games']">← Wróć</a></div>
+  <h1>{{ editId ? '✏️ Edytuj grę' : '➕ Dodaj nową grę' }}</h1>
+
+  <div class="form-card">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label>Tytuł *</label>
+        <input type="text" formControlName="title" placeholder="Nazwa gry">
+      </div>
+      <div class="field">
+        <label>Opis *</label>
+        <textarea formControlName="description" rows="4" placeholder="Opis gry..."></textarea>
+      </div>
+      <div class="field">
+        <label>Gatunki * (wybierz przynajmniej jeden)</label>
+        <div class="checkbox-group">
+          <label *ngFor="let g of genres" class="checkbox-item">
+            <input type="checkbox" [checked]="isGenreSelected(g)" (change)="toggleGenre(g)">
+            {{ g }}
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Platformy * (wybierz przynajmniej jedną)</label>
+        <div class="checkbox-group">
+          <label *ngFor="let p of platforms" class="checkbox-item">
+            <input type="checkbox" [checked]="isPlatformSelected(p)" (change)="togglePlatform(p)">
+            {{ p }}
+          </label>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="field">
+          <label>Rok wydania *</label>
+          <input type="number" formControlName="releaseYear" min="1958" max="2030">
+        </div>
+        <div class="field">
+          <label>Profil oceniania</label>
+          <select formControlName="defaultRatingProfile">
+            <option *ngFor="let p of profiles" [value]="p.value">{{ p.label }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>URL okładki</label>
+        <input type="url" formControlName="coverUrl" placeholder="https://...">
+      </div>
+      <div class="field checkbox-field">
+        <label>
+          <input type="checkbox" formControlName="hasStory">
+          Gra posiada fabułę
+        </label>
+      </div>
+
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="editId ? null : null" [routerLink]="editId ? ['/games', editId] : ['/games']">Anuluj</button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || loading">
+          {{ loading ? 'Zapisywanie...' : (editId ? 'Zapisz zmiany' : 'Dodaj grę') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

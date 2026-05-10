@@ -3,6 +3,9 @@ package pl.edu.pk.gamelibrary.game;
 import jakarta.persistence.*;
 import pl.edu.pk.gamelibrary.review.RatingProfile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "games")
 public class Game {
@@ -13,8 +16,17 @@ public class Game {
 
     private String title;
     private String description;
-    private String genre;
-    private String platform;
+    
+    @ElementCollection
+    @CollectionTable(name = "game_genres", joinColumns = @JoinColumn(name = "game_id"))
+    @Column(name = "genre")
+    private List<String> genres = new ArrayList<>();
+    
+    @ElementCollection
+    @CollectionTable(name = "game_platforms", joinColumns = @JoinColumn(name = "game_id"))
+    @Column(name = "platform")
+    private List<String> platforms = new ArrayList<>();
+    
     private Integer releaseYear;
     private String coverUrl;
 
@@ -29,20 +41,20 @@ public class Game {
 
     public Game() {}
 
-    public Game(String title, String description, String genre, String platform,
+    public Game(String title, String description, List<String> genres, List<String> platforms,
                 Integer releaseYear, String coverUrl) {
         this.title = title;
         this.description = description;
-        this.genre = genre;
-        this.platform = platform;
+        this.genres = genres != null ? genres : new ArrayList<>();
+        this.platforms = platforms != null ? platforms : new ArrayList<>();
         this.releaseYear = releaseYear;
         this.coverUrl = coverUrl;
     }
 
-    public Game(String title, String description, String genre, String platform,
+    public Game(String title, String description, List<String> genres, List<String> platforms,
                 Integer releaseYear, String coverUrl,
                 boolean hasStory, RatingProfile defaultRatingProfile) {
-        this(title, description, genre, platform, releaseYear, coverUrl);
+        this(title, description, genres, platforms, releaseYear, coverUrl);
         this.hasStory = hasStory;
         if (defaultRatingProfile != null) {
             this.defaultRatingProfile = defaultRatingProfile;
@@ -57,11 +69,11 @@ public class Game {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getGenre() { return genre; }
-    public void setGenre(String genre) { this.genre = genre; }
+    public List<String> getGenres() { return genres; }
+    public void setGenres(List<String> genres) { this.genres = genres != null ? genres : new ArrayList<>(); }
 
-    public String getPlatform() { return platform; }
-    public void setPlatform(String platform) { this.platform = platform; }
+    public List<String> getPlatforms() { return platforms; }
+    public void setPlatforms(List<String> platforms) { this.platforms = platforms != null ? platforms : new ArrayList<>(); }
 
     public Integer getReleaseYear() { return releaseYear; }
     public void setReleaseYear(Integer releaseYear) { this.releaseYear = releaseYear; }
