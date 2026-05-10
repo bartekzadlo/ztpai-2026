@@ -1,5 +1,10 @@
 package pl.edu.pk.gamelibrary.review;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,9 +20,9 @@ import pl.edu.pk.gamelibrary.review.dto.GameRatingStatsResponse;
 import pl.edu.pk.gamelibrary.review.dto.ReviewRequest;
 import pl.edu.pk.gamelibrary.review.dto.ReviewResponse;
 
-import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Recenzje", description = "Recenzje gier i statystyki ocen")
 @RestController
 @RequestMapping("/api/reviews")
 public class ReviewController {
@@ -30,7 +35,11 @@ public class ReviewController {
         this.userRepository = userRepository;
     }
 
-    /** GET /api/reviews/game/{gameId} – wszystkie recenzje danej gry */
+    @Operation(summary = "Recenzje danej gry (stronicowane)", description = "Publiczny endpoint.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista recenzji"),
+        @ApiResponse(responseCode = "404", description = "Gra nie istnieje")
+    })
     @GetMapping("/game/{gameId}")
     public ResponseEntity<PagedResponse<ReviewResponse>> getReviewsByGame(
             @PathVariable Long gameId,
@@ -53,26 +62,38 @@ public class ReviewController {
         ));
     }
 
-    /** GET /api/reviews/{id} – pojedyncza recenzja */
+    @Operation(summary = "Szczegóły recenzji po ID", description = "Publiczny endpoint.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Dane recenzji"),
+        @ApiResponse(responseCode = "404", description = "Recenzja nie istnieje")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<ReviewResponse> getReviewById(@PathVariable Long id) {
         return ResponseEntity.ok(ReviewMapper.toResponse(reviewService.getReviewById(id)));
     }
 
-    /** GET /api/reviews/game/{gameId}/average – średnia ocena gry */
+    @Operation(summary = "Średnia ocena gry", description = "Publiczny endpoint.")
+    @ApiResponse(responseCode = "200", description = "Średnia ocena (pole `averageScore`)")
     @GetMapping("/game/{gameId}/average")
     public ResponseEntity<Map<String, Double>> getAverageScore(@PathVariable Long gameId) {
         double avg = reviewService.getAverageScoreForGame(gameId);
         return ResponseEntity.ok(Map.of("averageScore", avg));
     }
 
-    /** GET /api/reviews/game/{gameId}/stats – statystyki ocen gry */
+    @Operation(summary = "Szczegółowe statystyki ocen gry", description = "Publiczny endpoint.")
+    @ApiResponse(responseCode = "200", description = "Statystyki ocen")
     @GetMapping("/game/{gameId}/stats")
     public ResponseEntity<GameRatingStatsResponse> getRatingStats(@PathVariable Long gameId) {
         return ResponseEntity.ok(reviewService.getRatingStatsForGame(gameId));
     }
 
-    /** POST /api/reviews – nowa recenzja */
+    @Operation(summary = "Dodaj recenzję", description = "Wymaga zalogowania (token JWT).",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Recenzja dodana"),
+        @ApiResponse(responseCode = "400", description = "Błąd walidacji"),
+        @ApiResponse(responseCode = "401", description = "Brak tokenu JWT")
+    })
     @PostMapping
     public ResponseEntity<ReviewResponse> createReview(
             @Valid @RequestBody ReviewRequest request,
@@ -83,7 +104,13 @@ public class ReviewController {
                 .body(ReviewMapper.toResponse(created));
     }
 
-    /** PUT /api/reviews/{id} – aktualizacja recenzji */
+    @Operation(summary = "Aktualizuj recenzję", description = "Wymaga zalogowania. Można edytować tylko własną recenzję.",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Recenzja zaktualizowana"),
+        @ApiResponse(responseCode = "403", description = "Nie jesteś autorem tej recenzji"),
+        @ApiResponse(responseCode = "404", description = "Recenzja nie istnieje")
+    })
     @PutMapping("/{id}")
     public ResponseEntity<ReviewResponse> updateReview(
             @PathVariable Long id,
@@ -94,7 +121,13 @@ public class ReviewController {
         return ResponseEntity.ok(ReviewMapper.toResponse(updated));
     }
 
-    /** DELETE /api/reviews/{id} – usunięcie recenzji */
+    @Operation(summary = "Usuń recenzję", description = "Wymaga zalogowania. Można usunąć tylko własną recenzję.",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Recenzja usunięta"),
+        @ApiResponse(responseCode = "403", description = "Nie jesteś autorem tej recenzji"),
+        @ApiResponse(responseCode = "404", description = "Recenzja nie istnieje")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(
             @PathVariable Long id,

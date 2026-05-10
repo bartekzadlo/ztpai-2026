@@ -1,5 +1,12 @@
 package pl.edu.pk.gamelibrary.auth.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +17,7 @@ import pl.edu.pk.gamelibrary.auth.dto.RegisterRequest;
 import pl.edu.pk.gamelibrary.auth.service.AuthService;
 import pl.edu.pk.gamelibrary.exception.ErrorResponse;
 
+@Tag(name = "Uwierzytelnianie", description = "Rejestracja i logowanie użytkowników")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -20,13 +28,14 @@ public class AuthController {
         this.authService = authService;
     }
 
-    /**
-     * POST /api/auth/register
-     * Body: { "username": "...", "password": "...", "role": "USER|ADMIN" }
-     *
-     * DEV ONLY: ten endpoint pozwala ustawić rolę (w tym ADMIN) przy rejestracji.
-     * W produkcji rola powinna być zawsze USER albo rejestracja ADMIN powinna być dostępna tylko dla ADMIN.
-     */
+    @Operation(summary = "Rejestracja nowego użytkownika",
+               description = "Tworzy konto. Pole `role` jest opcjonalne (domyślnie USER). DEV ONLY: w produkcji rola ADMIN powinna być nadawana tylko przez admina.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Konto utworzone, zwraca token JWT"),
+        @ApiResponse(responseCode = "400", description = "Błąd walidacji danych"),
+        @ApiResponse(responseCode = "409", description = "Nazwa użytkownika już zajęta",
+                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         try {
@@ -38,11 +47,13 @@ public class AuthController {
         }
     }
 
-    /**
-     * POST /api/auth/login
-     * Body: { "username": "...", "password": "..." }
-     * Zwraca JWT po poprawnym logowaniu.
-     */
+    @Operation(summary = "Logowanie użytkownika",
+               description = "Zwraca token JWT do użycia w nagłówku `Authorization: Bearer <token>`.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Zalogowano pomyślnie, zwraca token JWT"),
+        @ApiResponse(responseCode = "401", description = "Nieprawidłowe dane logowania",
+                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {

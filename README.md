@@ -8,14 +8,14 @@ Aplikacja umożliwia przeglądanie i zarządzanie kolekcją gier z podziałem na
 
 ## 🛠️ Stack technologiczny
 
-| Warstwa      | Technologia                          |
-|--------------|--------------------------------------|
-| Backend      | Java 17, Spring Boot 3.4.4           |
-| Persistence  | Spring Data JPA, H2 (in-memory)      |
-| Security     | Spring Security, JWT (JJWT 0.12.6)  |
-| Walidacja    | Jakarta Validation                   |
-| Testy        | JUnit 5, Mockito                     |
-| Build        | Maven (Maven Wrapper)                |
+| Warstwa     | Technologia                        |
+|-------------|------------------------------------|
+| Backend     | Java 17, Spring Boot 3.4.4         |
+| Persistence | Spring Data JPA, H2 (in-memory)    |
+| Security    | Spring Security, JWT (JJWT 0.12.6) |
+| Walidacja   | Jakarta Validation                 |
+| Testy       | JUnit 5, Mockito                   |
+| Build       | Maven (Maven Wrapper)              |
 
 ---
 
@@ -56,10 +56,10 @@ Dostępna w trybie deweloperskim pod adresem: `http://localhost:8080/h2-console`
 
 ### Autentykacja
 
-| Metoda | Endpoint              | Opis                          | Dostęp    |
-|--------|-----------------------|-------------------------------|-----------|
-| POST   | `/api/auth/register`  | Rejestracja nowego użytkownika | Publiczny |
-| POST   | `/api/auth/login`     | Logowanie, zwraca token JWT    | Publiczny |
+| Metoda | Endpoint             | Opis                           | Dostęp    |
+|--------|----------------------|--------------------------------|-----------|
+| POST   | `/api/auth/register` | Rejestracja nowego użytkownika | Publiczny |
+| POST   | `/api/auth/login`    | Logowanie, zwraca token JWT    | Publiczny |
 
 > ⚠️ **Wersja deweloperska:** `/api/auth/register` pozwala przekazać `role` (w tym `ADMIN`).
 > To jest celowo zostawione na potrzeby developmentu/testów. W produkcji nie wolno na to pozwalać.
@@ -135,15 +135,15 @@ POST /api/auth/register
 > Wszystkie endpointy wymagają nagłówka `Authorization: Bearer <token>`.
 > Autor recenzji jest pobierany z tokena JWT (nie trzeba przekazywać `authorId` w żądaniu).
 
-| Metoda | Endpoint                       | Opis                              |
-|--------|--------------------------------|-----------------------------------|
-| GET    | `/api/reviews/game/{gameId}`   | Lista recenzji dla gry            |
-| GET    | `/api/reviews/{id}`            | Szczegóły recenzji                |
-| GET    | `/api/reviews/game/{gameId}/average` | Średnia ocena gry (overall) |
-| GET    | `/api/reviews/game/{gameId}/stats` | Statystyki ocen (count/avg/histogram/średnie kryteriów) |
-| POST   | `/api/reviews`                 | Dodaj recenzję (1 na grę / użytk.)|
-| PUT    | `/api/reviews/{id}`            | Edytuj recenzję (tylko autor)     |
-| DELETE | `/api/reviews/{id}`            | Usuń recenzję (tylko autor)       |
+| Metoda | Endpoint                             | Opis                                                    |
+|--------|--------------------------------------|---------------------------------------------------------|
+| GET    | `/api/reviews/game/{gameId}`         | Lista recenzji dla gry                                  |
+| GET    | `/api/reviews/{id}`                  | Szczegóły recenzji                                      |
+| GET    | `/api/reviews/game/{gameId}/average` | Średnia ocena gry (overall)                             |
+| GET    | `/api/reviews/game/{gameId}/stats`   | Statystyki ocen (count/avg/histogram/średnie kryteriów) |
+| POST   | `/api/reviews`                       | Dodaj recenzję (1 na grę / użytk.)                      |
+| PUT    | `/api/reviews/{id}`                  | Edytuj recenzję (tylko autor)                           |
+| DELETE | `/api/reviews/{id}`                  | Usuń recenzję (tylko autor)                             |
 
 **GET `/api/reviews/game/{gameId}` – query params (paginacja + sortowanie):**
 
@@ -175,11 +175,11 @@ POST /api/auth/register
 
 > Endpointy wymagają nagłówka `Authorization: Bearer <token>`.
 
-| Metoda | Endpoint             | Opis |
-|--------|----------------------|------|
-| GET    | `/api/library`       | Lista pozycji w bibliotece zalogowanego użytkownika (paginacja/filtry) |
-| PUT    | `/api/library`       | Dodaje lub aktualizuje pozycję (upsert) |
-| DELETE | `/api/library/{gameId}` | Usuwa grę z biblioteki |
+| Metoda | Endpoint                | Opis                                                                   |
+|--------|-------------------------|------------------------------------------------------------------------|
+| GET    | `/api/library`          | Lista pozycji w bibliotece zalogowanego użytkownika (paginacja/filtry) |
+| PUT    | `/api/library`          | Dodaje lub aktualizuje pozycję (upsert)                                |
+| DELETE | `/api/library/{gameId}` | Usuwa grę z biblioteki                                                 |
 
 **Przykład upsert (PUT `/api/library`):**
 
@@ -212,15 +212,15 @@ POST /api/auth/register
 
 ### Kody HTTP
 
-| Kod | Znaczenie                          |
-|-----|------------------------------------|
-| 200 | OK                                 |
-| 201 | Zasób utworzony                    |
-| 204 | Usunięto (brak treści w odpowiedzi)|
-| 400 | Błędne dane wejściowe              |
-| 401 | Brak / nieprawidłowy token JWT     |
-| 403 | Brak uprawnień (zła rola)          |
-| 404 | Zasób nie znaleziony               |
+| Kod | Znaczenie                              |
+|-----|----------------------------------------|
+| 200 | OK                                     |
+| 201 | Zasób utworzony                        |
+| 204 | Usunięto (brak treści w odpowiedzi)    |
+| 400 | Błędne dane wejściowe                  |
+| 401 | Brak / nieprawidłowy token JWT         |
+| 403 | Brak uprawnień (zła rola)              |
+| 404 | Zasób nie znaleziony                   |
 | 409 | Konflikt (np. użytkownik już istnieje) |
 
 ---

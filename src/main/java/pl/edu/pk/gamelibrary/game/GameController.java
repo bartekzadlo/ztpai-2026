@@ -1,5 +1,11 @@
 package pl.edu.pk.gamelibrary.game;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +19,7 @@ import pl.edu.pk.gamelibrary.game.dto.GameResponse;
 
 import java.util.List;
 
+@Tag(name = "Gry", description = "Przeglądanie i zarządzanie biblioteką gier")
 @RestController
 @RequestMapping("/api/games")
 public class GameController {
@@ -23,18 +30,20 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    /** GET /api/games -> 200 z listą wszystkich gier */
+    @Operation(summary = "Lista gier z filtrowaniem i paginacją",
+               description = "Publiczny endpoint. Dostępne filtry: tytuł, gatunek, platforma, lata wydania, obecność fabuły.")
+    @ApiResponse(responseCode = "200", description = "Lista gier (stronicowana)")
     @GetMapping
     public PagedResponse<GameResponse> getAll(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "title,asc") String sort,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String genre,
-            @RequestParam(required = false) String platform,
-            @RequestParam(required = false) Integer releaseYearFrom,
-            @RequestParam(required = false) Integer releaseYearTo,
-            @RequestParam(required = false) Boolean hasStory
+            @Parameter(description = "Numer strony (od 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Rozmiar strony") @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sortowanie, np. `title,asc` lub `releaseYear,desc`") @RequestParam(defaultValue = "title,asc") String sort,
+            @Parameter(description = "Filtr po tytule (częściowy)") @RequestParam(required = false) String title,
+            @Parameter(description = "Filtr po gatunku") @RequestParam(required = false) String genre,
+            @Parameter(description = "Filtr po platformie") @RequestParam(required = false) String platform,
+            @Parameter(description = "Rok wydania od") @RequestParam(required = false) Integer releaseYearFrom,
+            @Parameter(description = "Rok wydania do") @RequestParam(required = false) Integer releaseYearTo,
+            @Parameter(description = "Czy gra ma fabułę") @RequestParam(required = false) Boolean hasStory
     ) {
         Sort parsedSort = parseSort(sort);
         PageRequest pageable = PageRequest.of(page, size, parsedSort);
@@ -59,13 +68,24 @@ public class GameController {
         );
     }
 
-    /** GET /api/games/{id} -> 200 lub 404 */
+    @Operation(summary = "Szczegóły gry po ID", description = "Publiczny endpoint.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Dane gry"),
+        @ApiResponse(responseCode = "404", description = "Gra nie istnieje")
+    })
     @GetMapping("/{id}")
     public GameResponse getById(@PathVariable Long id) {
         return GameMapper.toResponse(gameService.getGameById(id));
     }
 
-    /** POST /api/games -> 201 lub 400 przy złych danych. Wymaga roli ADMIN */
+    @Operation(summary = "Dodaj nową grę", description = "Wymaga roli **ADMIN**.",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Gra utworzona"),
+        @ApiResponse(responseCode = "400", description = "Błąd walidacji"),
+        @ApiResponse(responseCode = "401", description = "Brak tokenu JWT"),
+        @ApiResponse(responseCode = "403", description = "Brak roli ADMIN")
+    })
     @PostMapping
     public ResponseEntity<GameResponse> create(@Valid @RequestBody GameRequest request) {
         GameResponse response = GameMapper.toResponse(
@@ -74,7 +94,13 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /** PUT /api/games/{id} -> 200 lub 404. Wymaga roli ADMIN */
+    @Operation(summary = "Aktualizuj grę", description = "Wymaga roli **ADMIN**.",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Gra zaktualizowana"),
+        @ApiResponse(responseCode = "404", description = "Gra nie istnieje"),
+        @ApiResponse(responseCode = "403", description = "Brak roli ADMIN")
+    })
     @PutMapping("/{id}")
     public GameResponse update(@PathVariable Long id, @Valid @RequestBody GameRequest request) {
         return GameMapper.toResponse(
@@ -82,7 +108,13 @@ public class GameController {
         );
     }
 
-    /** DELETE /api/games/{id} -> 204 lub 404. Wymaga roli ADMIN */
+    @Operation(summary = "Usuń grę", description = "Wymaga roli **ADMIN**.",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Gra usunięta"),
+        @ApiResponse(responseCode = "404", description = "Gra nie istnieje"),
+        @ApiResponse(responseCode = "403", description = "Brak roli ADMIN")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         gameService.deleteGame(id);

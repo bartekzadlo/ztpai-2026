@@ -59,6 +59,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         // H2 console - tylko dev
                         .requestMatchers("/h2-console/**").permitAll()
+                        // Swagger UI / OpenAPI spec
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml"
+                        ).permitAll()
                         // Gry: odczyt publiczny, zapis/usuwanie tylko ADMIN
                         .requestMatchers(HttpMethod.GET, "/api/games", "/api/games/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/games").hasRole("ADMIN")
