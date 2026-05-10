@@ -23,7 +23,9 @@ public class AuthController {
     /**
      * POST /api/auth/register
      * Body: { "username": "...", "password": "...", "role": "USER|ADMIN" }
-     * Role jest opcjonalne – domyślnie USER.
+     *
+     * DEV ONLY: ten endpoint pozwala ustawić rolę (w tym ADMIN) przy rejestracji.
+     * W produkcji rola powinna być zawsze USER albo rejestracja ADMIN powinna być dostępna tylko dla ADMIN.
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {

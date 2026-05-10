@@ -59,11 +59,16 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         // H2 console - tylko dev
                         .requestMatchers("/h2-console/**").permitAll()
-                        // Gry: odczyt dla zalogowanych, zapis/usuwanie tylko ADMIN
-                        .requestMatchers(HttpMethod.GET, "/api/games", "/api/games/**").authenticated()
+                        // Gry: odczyt publiczny, zapis/usuwanie tylko ADMIN
+                        .requestMatchers(HttpMethod.GET, "/api/games", "/api/games/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/games").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/games/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/games/**").hasRole("ADMIN")
+                        // Recenzje: odczyt publiczny, modyfikacje dla zalogowanych
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/reviews").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/reviews/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").authenticated()
                         // Panel admina
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

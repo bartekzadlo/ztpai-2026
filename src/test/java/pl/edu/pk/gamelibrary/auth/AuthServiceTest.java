@@ -96,10 +96,10 @@ class AuthServiceTest {
         }
 
         /**
-         * HAPPY PATH – rejestracja z jawną rolą ADMIN.
+         * DEV ONLY – rejestracja z jawną rolą ADMIN.
          */
         @Test
-        @DisplayName("przyznaje rolę ADMIN gdy request.role == 'ADMIN'")
+        @DisplayName("DEV ONLY: przyznaje rolę ADMIN gdy request.role == 'ADMIN'")
         void register_shouldGrantAdminRole_whenRoleIsAdmin() {
             // given
             RegisterRequest request = new RegisterRequest();

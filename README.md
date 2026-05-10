@@ -61,6 +61,9 @@ Dostępna w trybie deweloperskim pod adresem: `http://localhost:8080/h2-console`
 | POST   | `/api/auth/register`  | Rejestracja nowego użytkownika | Publiczny |
 | POST   | `/api/auth/login`     | Logowanie, zwraca token JWT    | Publiczny |
 
+> ⚠️ **Wersja deweloperska:** `/api/auth/register` pozwala przekazać `role` (w tym `ADMIN`).
+> To jest celowo zostawione na potrzeby developmentu/testów. W produkcji nie wolno na to pozwalać.
+
 **Przykład rejestracji:**
 ```json
 POST /api/auth/register
@@ -117,6 +120,14 @@ POST /api/auth/register
 | POST   | `/api/reviews`                 | Dodaj recenzję (1 na grę / użytk.)|
 | PUT    | `/api/reviews/{id}`            | Edytuj recenzję (tylko autor)     |
 | DELETE | `/api/reviews/{id}`            | Usuń recenzję (tylko autor)       |
+
+### Admin
+
+> Endpointy dostępne tylko dla roli `ADMIN`.
+
+| Metoda | Endpoint             | Opis                              |
+|--------|----------------------|-----------------------------------|
+| POST   | `/api/admin/users`   | Utwórz użytkownika (USER/ADMIN)   |
 
 **Przykład ciała zapytania (POST/PUT):**
 ```json

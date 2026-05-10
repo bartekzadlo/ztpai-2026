@@ -30,6 +30,8 @@ public class AuthService {
             throw new IllegalArgumentException("Użytkownik '" + request.getUsername() + "' już istnieje");
         }
 
+        // DEV ONLY: umożliwia rejestrację admina z publicznego endpointu.
+        // W produkcji nie wolno na to pozwalać (eskalacja uprawnień).
         Role role = Role.USER;
         if ("ADMIN".equalsIgnoreCase(request.getRole())) {
             role = Role.ADMIN;
@@ -38,6 +40,25 @@ public class AuthService {
         AppUser user = new AppUser(
                 request.getUsername(),
                 passwordEncoder.encode(request.getPassword()),
+                role
+        );
+        userRepository.save(user);
+
+        String token = jwtService.generateToken(user.getUsername(), user.getRole().name());
+        return new AuthResponse(token, user.getUsername(), user.getRole().name());
+    }
+
+    public AuthResponse createUserAsAdmin(String username, String password, Role role) {
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Użytkownik '" + username + "' już istnieje");
+        }
+        if (role == null) {
+            role = Role.USER;
+        }
+
+        AppUser user = new AppUser(
+                username,
+                passwordEncoder.encode(password),
                 role
         );
         userRepository.save(user);
