@@ -15,7 +15,7 @@ export class GameListComponent implements OnInit {
   error = '';
 
   page = 0;
-  size = 12;
+  size = 10;
   totalPages = 0;
   totalItems = 0;
 
@@ -23,8 +23,8 @@ export class GameListComponent implements OnInit {
   searchInput$ = new Subject<string>();
   isAdmin = false;
 
-  genres = ['RPG', 'Action', 'Adventure', 'Strategy', 'Shooter', 'Sports', 'Simulation', 'Puzzle', 'Horror', 'Racing'];
-  platforms = ['PC', 'PlayStation', 'Xbox', 'Nintendo Switch', 'Mobile'];
+  genres = ['RPG', 'Action', 'Adventure', 'Strategy', 'Shooter', 'Sports', 'Simulation', 'Puzzle', 'Horror', 'Racing', 'Action-Adventure', 'Action RPG', 'JRPG', 'Survival Horror', 'Stealth', 'Hack and Slash', 'Metroidvania', 'Platformer', 'Roguelike', 'Run and Gun', 'FPS', 'RTS', 'Fighting', 'Battle Royale', 'TPS', 'MOBA', 'MMORPG', 'Sandbox', 'Survival'];
+  platforms = ['PC', 'PlayStation 3', 'PlayStation 4', 'PlayStation 5', 'Xbox 360', 'Xbox One', 'Xbox Series X', 'Nintendo Switch', 'Wii U', 'Mobile'];
   sortOptions = [
     { value: 'title,asc', label: 'Tytuł A-Z' },
     { value: 'title,desc', label: 'Tytuł Z-A' },

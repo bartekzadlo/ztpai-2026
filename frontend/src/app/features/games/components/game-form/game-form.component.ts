@@ -15,8 +15,8 @@ export class GameFormComponent implements OnInit {
   loading = false;
   error = '';
 
-  genres = ['RPG', 'Action', 'Adventure', 'Strategy', 'Shooter', 'Sports', 'Simulation', 'Puzzle', 'Horror', 'Racing'];
-  platforms = ['PC', 'PlayStation', 'Xbox', 'Nintendo Switch', 'Mobile'];
+  genres = ['RPG', 'Action', 'Adventure', 'Strategy', 'Shooter', 'Sports', 'Simulation', 'Puzzle', 'Horror', 'Racing', 'Action-Adventure', 'Action RPG', 'JRPG', 'Survival Horror', 'Stealth', 'Hack and Slash', 'Metroidvania', 'Platformer', 'Roguelike', 'Run and Gun', 'FPS', 'RTS', 'Fighting', 'Battle Royale', 'TPS', 'MOBA', 'MMORPG', 'Sandbox', 'Survival'];
+  platforms = ['PC', 'PlayStation 3', 'PlayStation 4', 'PlayStation 5', 'Xbox 360', 'Xbox One', 'Xbox Series X', 'Nintendo Switch', 'Wii U', 'Mobile'];
   profiles = [{ value: 'DEFAULT', label: 'Domyślny' }, { value: 'NARRATIVE', label: 'Fabularny' }, { value: 'MULTIPLAYER', label: 'Gameplay' }];
 
   constructor(private fb: FormBuilder, private gameService: GameService, private router: Router, private route: ActivatedRoute, private auth: AuthService) {}
